@@ -18,4 +18,10 @@ public class TestController {
         return "Hi guyss";
     }
 
+    @GetMapping("/hotelManagement")
+    public String hotelManagement() {
+        return "Hotel Management Project";
+    }
+
+
 }
