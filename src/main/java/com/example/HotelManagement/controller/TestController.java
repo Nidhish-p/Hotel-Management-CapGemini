@@ -13,4 +13,9 @@ public class TestController {
         return "Prajyot";
     }
 
+    @GetMapping("/sayhi")
+    public String sayHi() {
+        return "Hi guyss";
+    }
+
 }
