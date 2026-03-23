@@ -28,5 +28,10 @@ public class TestController {
         return "Hello there !! ";
     }
 
+    @GetMapping("mohit")
+    public String getBy(){
+        return "Mohit";
+    }
+
 
 }
