@@ -13,4 +13,15 @@ public class TestController {
         return "Prajyot";
     }
 
+    @GetMapping("/sayhi")
+    public String sayHi() {
+        return "Hi guyss";
+    }
+
+    @GetMapping("/hotelManagement")
+    public String hotelManagement() {
+        return "Hotel Management Project";
+    }
+
+
 }
