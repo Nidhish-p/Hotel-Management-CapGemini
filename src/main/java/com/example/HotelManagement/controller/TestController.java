@@ -23,5 +23,15 @@ public class TestController {
         return "Hotel Management Project";
     }
 
+    @GetMapping("/harshal")
+    public String getHarshal() {
+        return "Hello there !! ";
+    }
+
+    @GetMapping("mohit")
+    public String getBy(){
+        return "Mohit";
+    }
+
 
 }
