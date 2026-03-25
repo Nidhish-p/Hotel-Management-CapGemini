@@ -33,5 +33,8 @@ public class TestController {
         return "Mohit";
     }
 
-
+    @GetMapping("zaid")
+    public String getZaid(){
+        return "Zaid Here";
+    }
 }
