@@ -16,10 +16,10 @@ pipeline {
             }
         }
 
-        stage('Run App') {
-            steps {
-                bat 'java -jar target/*.jar'
-            }
-        }
+    stage('Run App') {
+      steps {
+        bat 'for %%f in (target\\*.jar) do java -jar "%%f"'
+      }
+    }
     }
 }
