@@ -32,5 +32,4 @@ build/
 resources/
 .vscode/
 pom.xml
-application.properties
-data.sql
+!**/src/main/resources/application.properties

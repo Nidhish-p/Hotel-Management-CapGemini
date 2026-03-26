@@ -18,4 +18,23 @@ public class TestController {
         return "Hi guyss";
     }
 
+    @GetMapping("/hotelManagement")
+    public String hotelManagement() {
+        return "Hotel Management Project";
+    }
+
+    @GetMapping("/harshal")
+    public String getHarshal() {
+        return "Hello there !! ";
+    }
+
+    @GetMapping("mohit")
+    public String getBy(){
+        return "Mohit";
+    }
+
+    @GetMapping("zaid")
+    public String getZaid(){
+        return "Zaid Here";
+    }
 }
