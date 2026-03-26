@@ -3,6 +3,9 @@ package com.example.HotelManagement.repository_test;
 import com.example.HotelManagement.api_test.PaymentAPITest;
 import com.example.HotelManagement.entity.Payment;
 import com.example.HotelManagement.repository.PaymentRepository;
+import java.sql.Date;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,13 +21,20 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.example.HotelManagement.entity.Payment;
+import com.example.HotelManagement.repository.PaymentRepository;
 
 
 @SpringBootTest
-@AutoConfigureMockMvc
 public class PaymentRepositoryTest {
 
     @Autowired
+    private WebApplicationContext webApplicationContext;
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -69,6 +79,19 @@ public class PaymentRepositoryTest {
         Optional<Payment> result = paymentRepository.findById(payment.getPayment_id());
         assertFalse(result.isPresent());
 
+    public void testGetPaymentById() throws Exception{
+        Payment payment = new Payment();
+        payment.setAmount(100.0);
+        payment.setPayment_date(Date.valueOf("2026-04-01"));
+        payment.setPayment_status("PAID");
+
+        Payment saved = paymentRepository.save(payment);
+        mockMvc.perform(get("/payments/" + saved.getPayment_id()))
+                .andExpect(status().isOk());
     }
 
+    @org.junit.jupiter.api.BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
 }

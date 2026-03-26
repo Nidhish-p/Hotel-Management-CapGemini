@@ -29,7 +29,11 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-resources/
+/resources/
+!src/main/resources/
+!src/main/resources/**
+!src/test/resources/
+!src/test/resources/**
 .vscode/
 pom.xml
 *.properties
