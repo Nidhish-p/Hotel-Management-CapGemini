@@ -21,6 +21,7 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer payment_id;
 
+//    reservation_id
     private Double amount;
     private Date payment_date;
     private String payment_status;
@@ -29,5 +30,13 @@ public class Payment {
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "payment_id=" + payment_id +
+                ", amount=" + amount +
+                ", payment_date=" + payment_date +
+                ", payment_status='" + payment_status + '\'' +
+                '}';
+    }
 }
-
