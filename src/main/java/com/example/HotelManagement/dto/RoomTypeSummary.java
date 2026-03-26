@@ -6,15 +6,13 @@ import org.springframework.data.rest.core.config.Projection;
 import java.math.BigDecimal;
 
 @Projection(name = "roomTypeSummary", types = RoomType.class)
-public interface RoomTypeDTO {
-
-    Integer getRoomTypeId();
+public interface RoomTypeSummary {
 
     String getTypeName();
 
     String getDescription();
 
-    Integer getMaxOccupancy();
+    int getMaxOccupancy();
 
     BigDecimal getPricePerNight();
 }
