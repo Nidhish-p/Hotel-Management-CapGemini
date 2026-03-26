@@ -21,7 +21,25 @@ public class PaymentAPITest {
 
     @Test
     public void testGetPaymentById() throws Exception{
-        mockMvc.perform(get("/payments/1")).andExpect(status().isOk());
+        String json = """
+                {
+                    "amount":12389,
+                    "payment_date":"2026-03-23",
+                    "payment_status":"Pending"
+                }
+                """;
+
+        String location = mockMvc.perform(post("/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                        .andExpect(status().isCreated())
+                        .andExpect(header().exists("Location"))
+                        .andReturn()
+                        .getResponse()
+                        .getHeader("Location");
+
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -68,7 +86,24 @@ public class PaymentAPITest {
 
     @Test
     public void testDeletePayment() throws Exception {
-        mockMvc.perform(delete("/payments/1"))
+        String json = """
+                {
+                    "amount":12389,
+                    "payment_date":"2026-03-23",
+                    "payment_status":"Pending"
+                }
+                """;
+
+        String location = mockMvc.perform(post("/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                        .andExpect(status().isCreated())
+                        .andExpect(header().exists("Location"))
+                        .andReturn()
+                        .getResponse()
+                        .getHeader("Location");
+
+        mockMvc.perform(delete(location))
                 .andExpect(status().isNoContent());
     }
 
