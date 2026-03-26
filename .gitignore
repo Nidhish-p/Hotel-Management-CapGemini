@@ -31,5 +31,11 @@ build/
 
 resources/
 .vscode/
+<<<<<<<<< Temporary merge branch 1
 pom.xml
 !**/src/main/resources/application.properties
+=========
+
+### pom.xml ###
+pom.xml
+>>>>>>>>> Temporary merge branch 2
