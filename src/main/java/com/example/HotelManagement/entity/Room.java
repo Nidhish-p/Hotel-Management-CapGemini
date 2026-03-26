@@ -1,7 +1,10 @@
 package com.example.HotelManagement.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +23,7 @@ public class Room {
     Integer roomTypeId;
     Boolean isAvailable;
 
-
+    @OneToMany(mappedBy="room")
+    private List<Reservation> reservation;
 
 }
