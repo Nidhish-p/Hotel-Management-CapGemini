@@ -5,20 +5,23 @@ import com.example.HotelManagement.repository.PaymentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import java.util.List;
+import java.sql.Date;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 
 @SpringBootTest
-@AutoConfigureMockMvc
 public class PaymentRepositoryTest {
 
     @Autowired
+    private WebApplicationContext webApplicationContext;
+
     private MockMvc mockMvc;
 
     @Autowired
@@ -33,7 +36,18 @@ public class PaymentRepositoryTest {
 
     @Test
     public void testGetPaymentById() throws Exception{
-        mockMvc.perform(get("/payments/1")).andExpect(status().isOk());
+        Payment payment = new Payment();
+        payment.setAmount(100.0);
+        payment.setPayment_date(Date.valueOf("2026-04-01"));
+        payment.setPayment_status("PAID");
+
+        Payment saved = paymentRepository.save(payment);
+        mockMvc.perform(get("/payments/" + saved.getPayment_id()))
+                .andExpect(status().isOk());
     }
 
+    @org.junit.jupiter.api.BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
 }
