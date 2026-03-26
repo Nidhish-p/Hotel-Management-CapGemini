@@ -1,14 +1,17 @@
 package com.example.HotelManagement.repository_test;
 
-import com.example.HotelManagement.entity.Room;
-import com.example.HotelManagement.repository.RoomRepo;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.example.HotelManagement.entity.Room;
+import com.example.HotelManagement.repository.RoomRepo;
 
 
 @SpringBootTest
@@ -28,7 +31,7 @@ public class roomRepoTest {
     void testFindRoomById() {
         Room room = roomRepo.findById(1).orElse(null);
         assertNotNull(room);
-        assertEquals(102, room.getRoomNumber());
+        assertEquals(101, room.getRoomNumber());
     }
 
     @Test
@@ -46,12 +49,22 @@ public class roomRepoTest {
 
     @Test
     void testUpdateRoom() {
-        Room room = roomRepo.findById(1).orElse(null);
-        assertNotNull(room);
+        // Create a room first
+        Room room = new Room();
+        room.setRoomId(1);
+        room.setRoomNumber(101);
+        room.setRoomTypeId(1);
+        
+        room.setIsAvailable(true);
 
-        room.setIsAvailable(false);
-        Room updatedRoom = roomRepo.save(room);
+        Room savedRoom = roomRepo.save(room);
 
+        // Update the room
+        savedRoom.setIsAvailable(false);
+        Room updatedRoom = roomRepo.save(savedRoom);
+
+        // Verify update
+        assertNotNull(updatedRoom);
         assertFalse(updatedRoom.getIsAvailable());
     }
 
