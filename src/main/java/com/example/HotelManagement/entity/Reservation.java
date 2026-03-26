@@ -22,4 +22,12 @@ public class Reservation {
     private String guest_phone;
     private LocalDate check_in_date;
     private LocalDate check_out_date;
+    @OneToMany(mappedBy = "reservation")
+    private List<Payment> payments;
+    @OneToMany(mappedBy = "reservation")
+    private List<Review> reviews;
+
+    @ManyToOne
+    @JoinColumn(name="room_id")
+    private Room room;
 }
