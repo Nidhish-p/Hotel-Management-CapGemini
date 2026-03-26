@@ -31,5 +31,3 @@ build/
 
 resources/
 .vscode/
-pom.xml
-**/src/main/resources/application.properties
