@@ -2,26 +2,30 @@ package com.example.HotelManagement.api_test;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class HotelAPITest {
+@Transactional
+public class RoomTypeApiTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    // TEST: GET ALL ROOM TYPES
     @Test
-    void getHotels_shouldReturnPagedResource() throws Exception {
-        mockMvc.perform(get("/hotels"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.hotels").exists())
-                .andExpect(jsonPath("$.page").exists());
-    }
+    void testGetAllRoomTypes() throws Exception {
 
+        mockMvc.perform(get("/roomtypes")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
 }

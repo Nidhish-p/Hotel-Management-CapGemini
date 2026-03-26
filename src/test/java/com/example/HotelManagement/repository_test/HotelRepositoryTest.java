@@ -1,7 +1,6 @@
 package com.example.HotelManagement.repository_test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +14,11 @@ public class HotelRepositoryTest {
     private HotelRepository hotelRepository;
 
     @Test
+    void findAll_shouldReturnHotels() {
+        assertThat(hotelRepository.findAll()).isNotNull();
+    }
+
+    @Test
     void saveAndFind_shouldPersistHotel() {
         Hotel hotel = new Hotel();
         hotel.setHotel_id(1);
@@ -25,4 +29,6 @@ public class HotelRepositoryTest {
         hotelRepository.save(hotel);
         assertThat(hotelRepository.findById(1)).isPresent();
     }
+
+
 }
