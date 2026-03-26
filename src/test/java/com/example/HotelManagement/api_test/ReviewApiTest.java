@@ -1,14 +1,17 @@
 package com.example.HotelManagement.api_test;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -16,39 +19,40 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ReviewApiTest {
     @Autowired
     private MockMvc mockMvc;
+
     // TEST 1: SAVE REVIEW
     @Test
     void testSaveReview() throws Exception {
 
         String reviewJson = """
-        {
-            "review_date": "2026-03-25",
-            "rating": 5,
-            "comment": "Excellent stay!"
-        }
-        """;
+                {
+                    "review_date": "2026-03-25",
+                    "rating": 5,
+                    "comment": "Excellent stay!"
+                }
+                """;
 
         mockMvc.perform(post("/review")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(reviewJson))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(reviewJson))
                 .andExpect(status().isCreated());
     }
 
     @Test
     void testSaveReviewWithInvalidReservationAPI() throws Exception {
         String reviewJson = """
-    {
-        "review_date": "2026-03-25",
-        "rating": 4,
-        "comment": "Invalid FK API test",
-        "reservation": "http://localhost:8080/reservations/9999"
-    }
-    """;
+                {
+                    "review_date": "2026-03-25",
+                    "rating": 4,
+                    "comment": "Invalid FK API test",
+                    "reservation": "http://localhost:8080/reservations/9999"
+                }
+                """;
 
         String location = mockMvc.perform(post("/review")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(reviewJson))
-                .andExpect(status().isCreated())   // ✅ EXPECT SUCCESS
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(reviewJson))
+                .andExpect(status().isCreated()) // ✅ EXPECT SUCCESS
                 .andReturn()
                 .getResponse()
                 .getHeader("Location");
@@ -67,21 +71,22 @@ public class ReviewApiTest {
                 .andExpect(status().isOk());
 
     }
+
     @Test
     void testUpdateReview() throws Exception {
 
         String reviewJson = """
-    {
-        "review_date": "2026-03-25",
-        "rating": 3,
-        "comment": "Old comment"
-    }
-    """;
+                {
+                    "review_date": "2026-03-25",
+                    "rating": 3,
+                    "comment": "Old comment"
+                }
+                """;
 
         // Creating review
         String response = mockMvc.perform(post("/review")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(reviewJson))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(reviewJson))
                 .andReturn()
                 .getResponse()
                 .getHeader("Location");
@@ -91,19 +96,19 @@ public class ReviewApiTest {
 
         // Update review
         String updatedJson = """
-    {
-        "review_date": "2026-03-25",
-        "rating": 5,
-        "comment": "Updated comment"
-    }
-    """;
+                {
+                    "review_date": "2026-03-25",
+                    "rating": 5,
+                    "comment": "Updated comment"
+                }
+                """;
 
         mockMvc.perform(put("/review/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedJson))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(updatedJson))
                 .andExpect(status().isNoContent());
 
-        //Verify update
+        // Verify update
         mockMvc.perform(get("/review/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rating").value(5))
