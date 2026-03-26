@@ -1,7 +1,7 @@
 package com.example.HotelManagement.repository_test;
 
-import com.example.HotelManagement.entity.Payment;
-import com.example.HotelManagement.repository.PaymentRepository;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.sql.Date;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import com.example.HotelManagement.entity.Payment;
+import com.example.HotelManagement.repository.PaymentRepository;
 
 
 @SpringBootTest
