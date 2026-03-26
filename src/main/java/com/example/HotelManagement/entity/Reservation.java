@@ -16,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Reservation {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer reservation_id;
     private String guest_name;
     private String guest_email;
