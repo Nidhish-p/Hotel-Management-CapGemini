@@ -2,29 +2,18 @@ package com.example.HotelManagement.dto;
 
 import java.math.BigDecimal;
 
-public class RoomTypeDTO {
+import org.springframework.data.rest.core.config.Projection;
 
-    private String typeName;
-    private String description;
-    private int maxOccupancy;
-    private BigDecimal pricePerNight;
+import com.example.HotelManagement.entity.RoomType;
 
-    public RoomTypeDTO(String typeName, String description, int maxOccupancy, BigDecimal pricePerNight) {
-        this.typeName = typeName;
-        this.description = description;
-        this.maxOccupancy = maxOccupancy;
-        this.pricePerNight = pricePerNight;
-    }
+@Projection(name = "roomTypeSummary", types = RoomType.class)
+public interface RoomTypeDTO {
 
-    public String getTypeName() { return typeName; }
-    public void setTypeName(String typeName) { this.typeName = typeName; }
+    String getTypeName();
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    String getDescription();
 
-    public int getMaxOccupancy() { return maxOccupancy; }
-    public void setMaxOccupancy(int maxOccupancy) { this.maxOccupancy = maxOccupancy; }
+    Integer getMaxOccupancy();
 
-    public BigDecimal getPricePerNight() { return pricePerNight; }
-    public void setPricePerNight(BigDecimal pricePerNight) { this.pricePerNight = pricePerNight; }
+    BigDecimal getPricePerNight();
 }
