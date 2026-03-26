@@ -1,14 +1,13 @@
 package com.example.HotelManagement.dto;
 
-import com.example.HotelManagement.entity.RoomType;
+import java.math.BigDecimal;
+
 import org.springframework.data.rest.core.config.Projection;
 
-import java.math.BigDecimal;
+import com.example.HotelManagement.entity.RoomType;
 
 @Projection(name = "roomTypeSummary", types = RoomType.class)
 public interface RoomTypeDTO {
-
-    Integer getRoomTypeId();
 
     String getTypeName();
 
