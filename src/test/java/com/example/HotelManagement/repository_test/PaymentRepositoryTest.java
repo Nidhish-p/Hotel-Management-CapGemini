@@ -16,11 +16,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 
 @SpringBootTest
-@AutoConfigureMockMvc
 public class PaymentRepositoryTest {
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
     private PaymentRepository paymentRepository;
@@ -33,8 +29,10 @@ public class PaymentRepositoryTest {
     }
 
     @Test
-    public void testGetPaymentById() throws Exception{
-        mockMvc.perform(get("/payments/1")).andExpect(status().isOk());
+    public void testDeleteById(){
+        paymentRepository.deleteById(2);
+
     }
+
 
 }
