@@ -4,26 +4,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
-public class RoomTypeApiTest {
-
+public class PaymentAPITest {
     @Autowired
     private MockMvc mockMvc;
 
-    // TEST: GET ALL ROOM TYPES
     @Test
-    void testGetAllRoomTypes() throws Exception {
-
-        mockMvc.perform(get("/roomtypes")
-                .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+    public void testGetPaymentById() throws Exception{
+        mockMvc.perform(get("/payments/1")).andExpect(status().isOk());
     }
 }
