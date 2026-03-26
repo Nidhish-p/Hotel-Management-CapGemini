@@ -3,12 +3,10 @@ package com.example.HotelManagement.repository_test;
 import com.example.HotelManagement.api_test.PaymentAPITest;
 import com.example.HotelManagement.entity.Payment;
 import com.example.HotelManagement.repository.PaymentRepository;
-<<<<<<< HEAD
-=======
+
 import java.sql.Date;
 import java.util.List;
 
->>>>>>> d58a26620b42c1e4e1708b556d8e825972fce7b4
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -62,7 +57,7 @@ public class PaymentRepositoryTest {
     }
 
     @Test
-    public void testDeletePayment(){
+    public void testDeletePayment() {
         Payment payment = new Payment();
         payment.setPayment_date(Date.valueOf("2026-01-24"));
         payment.setAmount(9089.0);
@@ -74,9 +69,7 @@ public class PaymentRepositoryTest {
 
         Optional<Payment> result = paymentRepository.findById(payment.getPayment_id());
         assertFalse(result.isPresent());
-
-<<<<<<< HEAD
-=======
+    }
     public void testGetPaymentById() throws Exception{
         Payment payment = new Payment();
         payment.setAmount(100.0);
@@ -86,7 +79,6 @@ public class PaymentRepositoryTest {
         Payment saved = paymentRepository.save(payment);
         mockMvc.perform(get("/payments/" + saved.getPayment_id()))
                 .andExpect(status().isOk());
->>>>>>> d58a26620b42c1e4e1708b556d8e825972fce7b4
     }
 
 }
