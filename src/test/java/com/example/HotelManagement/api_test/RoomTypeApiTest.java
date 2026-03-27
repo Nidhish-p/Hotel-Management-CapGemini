@@ -43,7 +43,7 @@ public class RoomTypeApiTest {
     void testGetAllRoomTypes() throws Exception {
 
         mockMvc.perform(get("/roomtypes")
-                        .accept(MediaType.APPLICATION_JSON))
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
 
