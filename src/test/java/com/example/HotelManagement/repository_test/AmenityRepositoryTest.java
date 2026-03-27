@@ -16,6 +16,19 @@ public class AmenityRepositoryTest {
 
     @Autowired
     AmenityRepository amenityRepository;
+
+
+    @Test
+    void testAddAmenity(){
+        Amenity amenity = new Amenity();
+        amenity.setName("Wi-Fi");
+        amenity.setDescription("High speed internet");
+
+        Amenity savedAmenity = amenityRepository.save(amenity);
+
+        assertNotNull(savedAmenity.getAmenity_id());
+        assertEquals("Wi-Fi", savedAmenity.getName());
+    }
     @Test
     void testFindAll() {
         List<Amenity> amenities = amenityRepository.findAll();
@@ -24,11 +37,7 @@ public class AmenityRepositoryTest {
     }
     @Test
     void testFindByName(){
-        Amenity amenity = new Amenity();
-        amenity.setAmenity_id(1);
-        amenity.setName("Wi-fi");
-        amenity.setDescription("High speed wi-fi ");
-        amenityRepository.save(amenity);
+
         List<Amenity> amenities = amenityRepository.findByName("WI-FI");
         assertNotNull(amenities);
         assertFalse(amenities.isEmpty());
@@ -57,7 +66,7 @@ public class AmenityRepositoryTest {
 
     @Test
     void DeleteAmenityById(){
-        Amenity amenity = amenityRepository.findById(1).orElse(null);
+        Amenity amenity = amenityRepository.findById(0).orElse(null);
         assertNotNull(amenity);
         amenityRepository.delete(amenity);
     }
