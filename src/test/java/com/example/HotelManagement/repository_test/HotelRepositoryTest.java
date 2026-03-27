@@ -49,7 +49,7 @@ public class HotelRepositoryTest {
     @Test
     void saveAndFind_shouldPersistHotel() {
         Hotel hotel = new Hotel();
-        hotel.setHotel_id(1);
+        hotel.setHotelId(1);
         hotel.setName("Test Hotel");
         hotel.setLocation("Test City");
         hotel.setDescription("Test Description");
@@ -437,7 +437,7 @@ public class HotelRepositoryTest {
 
     private Hotel buildHotel(int id, String name, String location, String description) {
         Hotel hotel = new Hotel();
-        hotel.setHotel_id(id);
+        hotel.setHotelId(id);
         hotel.setName(name);
         hotel.setLocation(location);
         hotel.setDescription(description);

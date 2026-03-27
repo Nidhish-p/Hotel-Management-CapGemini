@@ -31,5 +31,9 @@ build/
 
 resources/
 .vscode/
+<<<<<<< HEAD
 pom.xml
 *.properties
+=======
+create_hotel.sql
+>>>>>>> cdc4d9f (new commit app)
