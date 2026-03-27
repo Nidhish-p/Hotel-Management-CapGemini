@@ -38,7 +38,7 @@ public class AmenityRepositoryTest {
     @Test
     void testFindByName(){
 
-        List<Amenity> amenities = amenityRepository.findByName("WI-FI");
+        List<Amenity> amenities = amenityRepository.findByName("Wi-Fi");
         assertNotNull(amenities);
         assertFalse(amenities.isEmpty());
     }
