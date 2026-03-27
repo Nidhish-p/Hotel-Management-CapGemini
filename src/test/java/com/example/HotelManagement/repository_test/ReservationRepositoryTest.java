@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import com.example.HotelManagement.entity.Hotel;
 import com.example.HotelManagement.entity.Payment;
 import com.example.HotelManagement.entity.Reservation;
 import com.example.HotelManagement.entity.Review;
@@ -15,7 +16,10 @@ import com.example.HotelManagement.entity.Room;
 import com.example.HotelManagement.repository.ReservationRepository;
 import com.example.HotelManagement.repository.RoomRepo;
 
+import jakarta.transaction.Transactional;
+
 @SpringBootTest
+@Transactional
 class ReservationRepositoryTest {
 
     @Autowired
@@ -23,51 +27,14 @@ class ReservationRepositoryTest {
     @Autowired
     private RoomRepo roomRepository;
 
+    //2nd page
+
     @Test
     void getAllReservationsTestRepo() {
         List<Reservation> reservations = reservationRepository.findAll();
         assertThat(reservations).isNotNull();
         assertThat(reservations).isNotEmpty();
     }
-
-    @Test
-    void getRoomByReservation() {
-        Reservation r = reservationRepository.findById(1).orElse(null);
-        Room room = r.getRoom();
-        assertThat(room).isNotNull();
-    }
-
-    @Test
-    void getReviewFromReservation() {
-        Reservation r = reservationRepository.findById(1).orElse(null);
-        List<Review> list = r.getReviews();
-        assertThat(list).isNotNull();
-    }
-    
-    @Test
-    void getPaymentFromReservation() {
-        Reservation r = reservationRepository.findById(1).orElse(null);
-        List<Payment> list = r.getPayments();
-        assertThat(list).isNotNull();
-    }
-
-    // @Test
-    // void saveReservationTest() {
-    //     Room room = roomRepository.findById(50).orElse(null);
-    //     Reservation reservation = new Reservation();
-    //     reservation.setReservation_id(52);
-    //     reservation.setGuestName("Tanvi Dhok");
-    //     reservation.setGuestEmail("tanvi@test.com");
-    //     reservation.setGuest_phone("1234567890");
-    //     reservation.setCheckInDate(LocalDate.now());
-    //     reservation.setCheckOutDate(LocalDate.now().plusDays(2));
-    //     reservation.setRoom(room);
-
-    //     Reservation saved = reservationRepository.save(reservation);
-
-    //     assertThat(saved).isNotNull();
-    //     assertThat(saved.getReservation_id()).isEqualTo(1);
-    // }
 
     @Test
     void getReservationByGuestEmail() {
@@ -97,16 +64,16 @@ class ReservationRepositoryTest {
         assertThat(list).allMatch(r -> r.getGuestName().equals(name));
     }
     
-    // @Test
-    // void getReservationBetweenDates() {
-    //     LocalDate start = LocalDate.of(2025, 3, 20);
-    //     LocalDate end = LocalDate.of(2025, 3, 30);
+    @Test
+    void getReservationBetweenDates() {
+        LocalDate start = LocalDate.of(2024, 10, 1);
+        LocalDate end = LocalDate.of(2024, 10, 5);
 
-    //     List<Reservation> list = reservationRepository.findByCheckInDateBetween(start, end);
+        List<Reservation> list = reservationRepository.findByCheckInDateBetween(start, end);
 
-    //     assertThat(list).isNotNull();
-    //     assertThat(list.size()).isGreaterThan(0);
-    // }
+        assertThat(list).isNotNull();
+        assertThat(list.size()).isGreaterThan(0);
+    }
     
     @Test
     void getReservationByCheckOutDate() {
@@ -115,6 +82,58 @@ class ReservationRepositoryTest {
         List<Reservation> list = reservationRepository.findByCheckOutDate(date);
 
         assertThat(list).isNotNull();
+    }
+
+    @Test
+    void addReservation() {
+        Room room = roomRepository.findById(1).orElse(null);
+        assertThat(room).isNotNull();
+
+        Reservation r = new Reservation();
+        r.setGuestName("Jason Derulo");
+        r.setGuestEmail("jason@test.com");
+        r.setGuest_phone("1234567890");
+        r.setCheckInDate(LocalDate.of(2025, 10, 1));
+        r.setCheckOutDate(LocalDate.of(2025, 10, 5));
+        r.setRoom(room);
+        room.setIsAvailable(false);
+        roomRepository.save(room);
+
+        Reservation saved = reservationRepository.save(r);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getReservation_id()).isNotNull();
+    }
+    
+
+    // 3rd page 
+
+        @Test
+    void getRoomByReservation() {
+        Reservation r = reservationRepository.findById(1).orElse(null);
+        Room room = r.getRoom();
+        assertThat(room).isNotNull();
+    }
+
+    @Test
+    void getReviewFromReservation() {
+        Reservation r = reservationRepository.findById(1).orElse(null);
+        List<Review> list = r.getReviews();
+        assertThat(list).isNotNull();
+    }
+    
+    @Test
+    void getPaymentFromReservation() {
+        Reservation r = reservationRepository.findById(1).orElse(null);
+        List<Payment> list = r.getPayments();
+        assertThat(list).isNotNull();
+    }
+
+    @Test
+    void getHotelFromReservation() {
+        Reservation r = reservationRepository.findById(1).orElse(null);
+        Hotel hotel = r.getRoom().getHotel();
+        assertThat(hotel).isNotNull();
     }
     
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,5 +27,9 @@ public class Room {
 
     @OneToMany(mappedBy="room")
     private List<Reservation> reservation;
+
+    @ManyToOne
+    @JoinColumn(name="hotel_id")
+    private Hotel hotel;
 
 }

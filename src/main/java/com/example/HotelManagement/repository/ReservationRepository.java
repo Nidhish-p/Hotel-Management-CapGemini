@@ -18,8 +18,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     List<Reservation> findByCheckOutDate(LocalDate date);
 
-    //List<Reservation> findByCheckInDateBetween(LocalDate start, LocalDate end);
+    List<Reservation> findByCheckInDateBetween(LocalDate start, LocalDate end);
 
     List<Reservation> findByGuestName(String name);
+
     List<Reservation> findByGuestEmail(String email);
+    
 }
