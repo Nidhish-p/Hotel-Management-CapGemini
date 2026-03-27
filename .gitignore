@@ -32,3 +32,5 @@ build/
 .vscode/
 src/main/resources/data.sql
 src/main/resources/application.properties
+src/test/resources/application.properties
+src/main/java/com/example/HotelManagement/entity/Hotel.java
