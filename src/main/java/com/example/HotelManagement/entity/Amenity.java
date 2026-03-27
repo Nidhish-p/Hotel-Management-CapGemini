@@ -14,6 +14,7 @@ import lombok.Data;
 public class Amenity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     int amenity_id;
     String name;
     String description;
