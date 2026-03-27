@@ -3,6 +3,7 @@ package com.example.HotelManagement.entity;
 import java.util.List;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -30,9 +31,15 @@ public class Hotel {
 
     @ManyToMany
     @JoinTable(
-        name = "hotel_amenity",
-        joinColumns = @JoinColumn(name = "hotel_id"),
-        inverseJoinColumns = @JoinColumn(name = "amenity_id")
+        name = "hotelamenity",
+        joinColumns = @JoinColumn(
+                name = "hotel_id",
+                foreignKey = @ForeignKey(name = "fk_hotelamenity_hotel")
+        ),
+        inverseJoinColumns = @JoinColumn(
+                name = "amenity_id",
+                foreignKey = @ForeignKey(name = "fk_hotelamenity_amenity")
+        )
     )
     private List<Amenity> amenities;
     
