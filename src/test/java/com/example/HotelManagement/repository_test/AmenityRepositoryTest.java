@@ -42,6 +42,7 @@ public class AmenityRepositoryTest {
     @Test
     void testaddAmneity(){
         Amenity amenity = new Amenity();
+        amenity.setAmenity_id(84);
         amenity.setName("BathRoom");
         amenity.setDescription("Bath Room with tube");
         amenityRepository.save(amenity);
