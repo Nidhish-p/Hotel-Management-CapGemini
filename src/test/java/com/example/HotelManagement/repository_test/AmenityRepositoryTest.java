@@ -44,7 +44,7 @@ public class AmenityRepositoryTest {
     }
     @Test
     void testFindById(){
-        Amenity amenity = amenityRepository.findById(1).orElse(null);
+        Amenity amenity = amenityRepository.findById(0).orElse(null);
         assertNotNull(amenity);
         assertEquals("Wi-Fi", amenity.getName());
     }
