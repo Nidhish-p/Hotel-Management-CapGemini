@@ -66,23 +66,23 @@ public class PaymentAPITest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    public void testUpdatePayment() throws Exception {
-//
-//        String json = """
-//                {
-//                    "reservationId":1,
-//                    "amount":3000,
-//                    "paymentDate":"2026-03-23",
-//                    "paymentStatus":"Completed"
-//                }
-//                """;
-//
-//        mockMvc.perform(put("/payments/1")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(json))
-//                .andExpect(status().isOk());
-//    }
+    @Test
+    public void testUpdatePayment() throws Exception {
+
+        String json = """
+                {
+                   "amount": 3000,
+                   "payment_date": "2026-03-23",
+                   "payment_status": "Paid",
+                   "reservation_id": 1
+                 }
+                """;
+
+        mockMvc.perform(put("/payments/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk());
+    }
 
     @Test
     public void testDeletePayment() throws Exception {
