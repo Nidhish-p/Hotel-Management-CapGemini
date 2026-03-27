@@ -36,8 +36,6 @@ public class HotelRepositoryTest {
 
     private static final AtomicInteger HOTEL_SEQ =
             new AtomicInteger((int) (System.currentTimeMillis() % 1_000_000) + 3_000_000);
-    private static final AtomicInteger AMENITY_SEQ =
-            new AtomicInteger((int) (System.currentTimeMillis() % 1_000_000) + 4_000_000);
 
     // TEST 1: Find all hotels
     @Test
@@ -138,8 +136,8 @@ public class HotelRepositoryTest {
     // TEST 10: Fetch amenities for valid hotel name
     @Test
     void getAmenityByHotelName_existingHotelWithAmenities_shouldReturnAmenities() {
-        Amenity wifi = buildAmenity(nextAmenityId(), "WiFi", "Wireless Internet");
-        Amenity pool = buildAmenity(nextAmenityId(), "Pool", "Swimming Pool");
+        Amenity wifi = buildAmenity("WiFi", "Wireless Internet");
+        Amenity pool = buildAmenity("Pool", "Swimming Pool");
         entityManager.persist(wifi);
         entityManager.persist(pool);
 
@@ -267,8 +265,8 @@ public class HotelRepositoryTest {
     // TEST 20: Delete hotel with cascade (orphanRemoval=true)
     @Test
     void deleteById_withAmenitiesLinked_shouldDeleteHotel() {
-        Amenity wifi = buildAmenity(nextAmenityId(), "WiFi", "Wireless Internet");
-        Amenity pool = buildAmenity(nextAmenityId(), "Pool", "Swimming Pool");
+        Amenity wifi = buildAmenity("WiFi", "Wireless Internet");
+        Amenity pool = buildAmenity("Pool", "Swimming Pool");
         entityManager.persist(wifi);
         entityManager.persist(pool);
 
@@ -289,8 +287,8 @@ public class HotelRepositoryTest {
     // TEST 21: Delete hotel linked with amenities - cascade/restrict check
     @Test
     void deleteById_withLinkedAmenities_shouldDeleteHotelOnly() {
-        Amenity gym = buildAmenity(nextAmenityId(), "Gym", "Fitness Center");
-        Amenity spa = buildAmenity(nextAmenityId(), "Spa", "Wellness");
+        Amenity gym = buildAmenity("Gym", "Fitness Center");
+        Amenity spa = buildAmenity("Spa", "Wellness");
         entityManager.persist(gym);
         entityManager.persist(spa);
 
@@ -313,8 +311,8 @@ public class HotelRepositoryTest {
     // TEST 22: Fetch hotels by location with joined amenities
     @Test
     void getHotelsByLocation_withAmenities_shouldLoadAmenities() {
-        Amenity wifi = buildAmenity(nextAmenityId(), "WiFi", "Wireless Internet");
-        Amenity pool = buildAmenity(nextAmenityId(), "Pool", "Swimming Pool");
+        Amenity wifi = buildAmenity("WiFi", "Wireless Internet");
+        Amenity pool = buildAmenity("Pool", "Swimming Pool");
         entityManager.persist(wifi);
         entityManager.persist(pool);
 
@@ -431,10 +429,6 @@ public class HotelRepositoryTest {
         return HOTEL_SEQ.getAndIncrement();
     }
 
-    private int nextAmenityId() {
-        return AMENITY_SEQ.getAndIncrement();
-    }
-
     private Hotel buildHotel(int id, String name, String location, String description) {
         Hotel hotel = new Hotel();
         hotel.setHotel_id(id);
@@ -444,9 +438,8 @@ public class HotelRepositoryTest {
         return hotel;
     }
 
-    private Amenity buildAmenity(int id, String name, String description) {
+    private Amenity buildAmenity(String name, String description) {
         Amenity amenity = new Amenity();
-        ReflectionTestUtils.setField(amenity, "amenity_id", id);
         ReflectionTestUtils.setField(amenity, "name", name);
         ReflectionTestUtils.setField(amenity, "description", description);
         return amenity;

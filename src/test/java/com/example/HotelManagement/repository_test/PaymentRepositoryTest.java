@@ -15,9 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -59,7 +56,7 @@ public class PaymentRepositoryTest {
     }
 
     @Test
-    public void testDeletePayment(){
+    public void testDeletePayment() {
         Payment payment = new Payment();
         payment.setPayment_date(Date.valueOf("2026-01-24"));
         payment.setAmount(9089.0);
