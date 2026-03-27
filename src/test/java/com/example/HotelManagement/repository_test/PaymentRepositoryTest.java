@@ -3,7 +3,6 @@ package com.example.HotelManagement.repository_test;
 import com.example.HotelManagement.api_test.PaymentAPITest;
 import com.example.HotelManagement.entity.Payment;
 import com.example.HotelManagement.repository.PaymentRepository;
-
 import java.sql.Date;
 import java.util.List;
 
@@ -70,6 +69,7 @@ public class PaymentRepositoryTest {
         Optional<Payment> result = paymentRepository.findById(payment.getPayment_id());
         assertFalse(result.isPresent());
     }
+
     public void testGetPaymentById() throws Exception{
         Payment payment = new Payment();
         payment.setAmount(100.0);
