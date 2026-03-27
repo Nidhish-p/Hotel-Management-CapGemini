@@ -205,6 +205,175 @@ public class HotelAPITest {
                 .andExpect(jsonPath("$._embedded.hotels").isEmpty());
     }
 
+    // TEST 14: Add hotel with name exactly at boundary length
+    @Test
+    void addHotel_withBoundaryLengthName_shouldCreate() throws Exception {
+        String boundaryName = "B".repeat(255);
+        String hotelJson = buildHotelJson(nextHotelId(), boundaryName, "Bhopal", "Boundary length test");
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotelJson))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 15: Add hotel exceeding name length
+    @Test
+    void addHotel_withExceedingNameLength_shouldCreate() throws Exception {
+        String exceedingName = "C".repeat(256);
+        String hotelJson = buildHotelJson(nextHotelId(), exceedingName, "Kochi", "Exceeding length test");
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotelJson))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 16: Add hotel with empty string name
+    @Test
+    void addHotel_withEmptyName_shouldCreate() throws Exception {
+        String hotelJson = buildHotelJson(nextHotelId(), "", "Lucknow", "Empty name test");
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotelJson))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 17: Insert hotel with null description
+    @Test
+    void addHotel_withNullDescription_shouldCreate() throws Exception {
+        String hotelJson = """
+                {
+                    "hotel_id": %d,
+                    "name": "Null Desc Hotel",
+                    "location": "Nagpur",
+                    "description": null
+                }
+                """.formatted(nextHotelId());
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotelJson))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 18: Bulk insert multiple hotels
+    @Test
+    void addHotel_bulkInsertMultipleHotels_shouldCreateAll() throws Exception {
+        String hotel1 = buildHotelJson(nextHotelId(), "Bulk One", "Pune", "First");
+        String hotel2 = buildHotelJson(nextHotelId(), "Bulk Two", "Pune", "Second");
+        String hotel3 = buildHotelJson(nextHotelId(), "Bulk Three", "Pune", "Third");
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotel1))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotel2))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(hotel3))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 19: Duplicate name + location combination
+    @Test
+    void addHotel_withDuplicateNameAndLocation_shouldCreate() throws Exception {
+        String name = "Dup Combo Hotel";
+        String location = "Mysore";
+        String first = buildHotelJson(nextHotelId(), name, location, "First");
+        String second = buildHotelJson(nextHotelId(), name, location, "Second");
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(first))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/hotels")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(second))
+                .andExpect(status().isCreated());
+    }
+
+    // TEST 20: Fetch first page of hotels with size 10
+    @Test
+    void getHotels_firstPageWithSizeTen_shouldReturnPaged() throws Exception {
+        seedHotels(25, "PageTest-First");
+
+        mockMvc.perform(get("/hotels")
+                .param("page", "0")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(0));
+    }
+
+    // TEST 21: Fetch second page of hotels
+    @Test
+    void getHotels_secondPageWithSizeTen_shouldReturnPaged() throws Exception {
+        seedHotels(25, "PageTest-Second");
+
+        mockMvc.perform(get("/hotels")
+                .param("page", "1")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(1));
+    }
+
+    // TEST 22: Fetch hotels sorted by name ascending
+    @Test
+    void getHotels_sortedByNameAsc_shouldReturnPaged() throws Exception {
+        seedHotels(8, "SortTest");
+
+        mockMvc.perform(get("/hotels")
+                .param("page", "0")
+                .param("size", "5")
+                .param("sort", "name,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.size").value(5))
+                .andExpect(jsonPath("$.page.number").value(0));
+    }
+
+    // TEST 23: Fetch page beyond total pages
+    @Test
+    void getHotels_pageBeyondTotal_shouldReturnEmptyPage() throws Exception {
+        seedHotels(5, "PageTest-Beyond");
+
+        mockMvc.perform(get("/hotels")
+                .param("page", "98")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.size").value(10))
+                .andExpect(jsonPath("$.page.number").value(98));
+    }
+
+    // TEST 24: Fetch with page size zero
+    @Test
+    void getHotels_pageSizeZero_shouldReturnOk() throws Exception {
+        mockMvc.perform(get("/hotels")
+                .param("page", "0")
+                .param("size", "0"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.number").value(0));
+    }
+
+    // TEST 25: Fetch with negative page number
+    @Test
+    void getHotels_negativePageNumber_shouldReturnOk() throws Exception {
+        mockMvc.perform(get("/hotels")
+                .param("page", "-1")
+                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page.number").value(0));
+    }
+
     private int nextHotelId() {
         return HOTEL_SEQ.getAndIncrement();
     }
@@ -227,6 +396,17 @@ public class HotelAPITest {
         hotel.setLocation(location);
         hotel.setDescription(description);
         return hotel;
+    }
+
+    private void seedHotels(int count, String namePrefix) {
+        for (int i = 0; i < count; i++) {
+            Hotel hotel = buildHotelEntity(
+                    nextHotelId(),
+                    namePrefix + "-" + i,
+                    "Seed City",
+                    "Seed Desc");
+            hotelRepository.save(hotel);
+        }
     }
 
 }
