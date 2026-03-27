@@ -391,7 +391,7 @@ public class HotelAPITest {
 
     private Hotel buildHotelEntity(int id, String name, String location, String description) {
         Hotel hotel = new Hotel();
-        hotel.setHotel_id(id);
+        hotel.setHotelId(id);
         hotel.setName(name);
         hotel.setLocation(location);
         hotel.setDescription(description);
