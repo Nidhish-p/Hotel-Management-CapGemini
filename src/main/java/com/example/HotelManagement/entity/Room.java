@@ -22,6 +22,7 @@ public class Room {
     Integer roomNumber;
     Integer roomTypeId;
     Boolean isAvailable;
+    Integer hotelId;
 
     @OneToMany(mappedBy="room")
     private List<Reservation> reservation;
