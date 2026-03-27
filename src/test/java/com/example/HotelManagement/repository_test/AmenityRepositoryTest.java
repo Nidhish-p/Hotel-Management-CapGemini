@@ -24,6 +24,11 @@ public class AmenityRepositoryTest {
     }
     @Test
     void testFindByName(){
+        Amenity amenity = new Amenity();
+        amenity.setAmenity_id(1);
+        amenity.setName("Wi-fi");
+        amenity.setDescription("High speed wi-fi ");
+        amenityRepository.save(amenity);
         List<Amenity> amenities = amenityRepository.findByName("WI-FI");
         assertNotNull(amenities);
         assertFalse(amenities.isEmpty());
@@ -51,7 +56,7 @@ public class AmenityRepositoryTest {
 
     @Test
     void DeleteAmenityById(){
-        Amenity amenity = amenityRepository.findById(57).orElse(null);
+        Amenity amenity = amenityRepository.findById(1).orElse(null);
         assertNotNull(amenity);
         amenityRepository.delete(amenity);
     }
