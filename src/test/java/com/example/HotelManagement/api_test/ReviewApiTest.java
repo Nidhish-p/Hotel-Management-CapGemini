@@ -2,6 +2,7 @@ package com.example.HotelManagement.api_test;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 public class ReviewApiTest {
     @Autowired
@@ -66,7 +68,6 @@ public class ReviewApiTest {
     // TEST 2: GET ALL REVIEWS
     @Test
     void testGetAllReviews() throws Exception {
-
         mockMvc.perform(get("/review"))
                 .andExpect(status().isOk());
 

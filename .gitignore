@@ -33,3 +33,6 @@ resources/
 .vscode/
 pom.xml
 *.properties
+src/test/resources/
+src/test/resources/application.properties
+src/main/resources/data.sql
