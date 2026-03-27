@@ -1,7 +1,12 @@
 package com.example.HotelManagement.entity;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -22,5 +27,13 @@ public class Hotel {
     String name;
     String location;
     String description;
+
+    @ManyToMany
+    @JoinTable(
+        name = "hotel_amenity",
+        joinColumns = @JoinColumn(name = "hotel_id"),
+        inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private List<Amenity> amenities;
     
 }
