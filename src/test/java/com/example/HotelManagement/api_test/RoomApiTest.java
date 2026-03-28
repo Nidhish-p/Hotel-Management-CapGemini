@@ -149,6 +149,30 @@ class RoomApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.amenities", hasSize(0)));
     }
+    @Test
+    @DisplayName("Full 3-page flow: hotel → rooms → amenities via HAL links")
+    void fullNavigationFlow_hotelToRoomsToAmenities() throws Exception {
+
+        // Page 1 — get hotelA
+        mockMvc.perform(get("/hotels/" + hotelA.getHotelId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Grand Hyatt"))
+                .andExpect(jsonPath("$._links.rooms.href").exists());
+
+        // Page 2 — get rooms for hotelA
+        mockMvc.perform(get("/rooms/search/findByHotel")
+                        .param("hotelId", String.valueOf(hotelA.getHotelId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.rooms", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.rooms[0]._links.amenities.href").exists());
+
+        // Page 3 — get amenities for room1
+        mockMvc.perform(get("/rooms/" + room1.getRoomId() + "/amenities"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.amenities", hasSize(2)))
+                .andExpect(jsonPath("$._embedded.amenities[*].name",
+                        containsInAnyOrder("Free WiFi", "Air Conditioning")));
+    }
 
 
 }
