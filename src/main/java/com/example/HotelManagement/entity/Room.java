@@ -2,16 +2,8 @@ package com.example.HotelManagement.entity;
 
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,23 +18,36 @@ public class Room {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer roomId;
-    Integer roomNumber;
-    Integer roomTypeId;
-    Boolean isAvailable;
+    @Column(name = "room_id")
+    private Integer roomId;
+
+    @Column(name = "room_number")
+    private Integer roomNumber;
+
+    @Column(name = "is_available")
+    private Boolean isAvailable;
 
     @OneToMany(mappedBy="room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Reservation> reservation;
 
-    @ManyToMany
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_type_id",
+            foreignKey = @ForeignKey(name = "fk_room_roomtype"))
+    private RoomType roomType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id",
+            foreignKey = @ForeignKey(name = "fk_room_hotel"))
+    private Hotel hotel;
+
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "roomamenity",
-            joinColumns = @JoinColumn(name = "room_id"),
-            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+            joinColumns = @JoinColumn(name = "room_id",
+                    foreignKey = @ForeignKey(name = "fk_roomamenity_room")),
+            inverseJoinColumns = @JoinColumn(name = "amenityId",
+                    foreignKey = @ForeignKey(name = "fk_roomamenity_amenity"))
     )
     private List<Amenity> amenities;
-    
-    @ManyToOne
-    @JoinColumn(name="hotel_id")
-    Hotel hotel;
 }
