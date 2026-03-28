@@ -55,7 +55,7 @@ class ReservationApiTest {
 
         Room room = new Room();
         room.setRoomNumber(101);
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(room.getRoomType());
         room.setIsAvailable(true);
         room.setHotel(hotel);
 
