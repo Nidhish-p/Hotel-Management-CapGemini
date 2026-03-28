@@ -1,11 +1,17 @@
 package com.example.HotelManagement.api_test;
 
+import com.example.HotelManagement.entity.Payment;
+import com.example.HotelManagement.entity.Reservation;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.sql.Date;
+import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -18,6 +24,22 @@ public class PaymentAPITest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    private Payment testPayment;
+    private Reservation testReservation;
+
+    @BeforeEach
+    void setUp() {
+        testReservation = new Reservation();
+        testReservation.setReservation_id(1);
+
+        testPayment = new Payment();
+        testPayment.setPayment_id(1);
+        testPayment.setAmount(1500.00);
+        testPayment.setPayment_date(Date.valueOf(LocalDate.now()));
+        testPayment.setPayment_status("PAID");
+        testPayment.setReservation(testReservation);
+    }
 
     @Test
     public void testGetPaymentById() throws Exception{
@@ -57,6 +79,12 @@ public class PaymentAPITest {
                         .content(json))
                         .andExpect(status().isCreated())
                         .andExpect(header().exists("Location"));
+
+    }
+
+
+    @Test
+    public void testCreatePaymentWithNegativeAmount() throws Exception{
 
     }
 
