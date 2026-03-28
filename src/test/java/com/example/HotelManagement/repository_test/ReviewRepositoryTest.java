@@ -3,10 +3,12 @@ import com.example.HotelManagement.entity.Review;
 import com.example.HotelManagement.entity.Hotel;
 import com.example.HotelManagement.entity.Room;
 import com.example.HotelManagement.entity.Reservation;
+import com.example.HotelManagement.entity.RoomType;
 import com.example.HotelManagement.repository.ReservationRepository;
 import com.example.HotelManagement.repository.ReviewRepository;
 import com.example.HotelManagement.repository.HotelRepository;
-import com.example.HotelManagement.repository.RoomRepo;
+import com.example.HotelManagement.repository.RoomRepository;
+import com.example.HotelManagement.repository.RoomTypeRepository;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 @Transactional
@@ -29,24 +28,21 @@ public class ReviewRepositoryTest {
     @Autowired
     HotelRepository hotelRepository;
     @Autowired
-    RoomRepo roomRepository;
+    RoomRepository roomRepository;
+    @Autowired
+    RoomTypeRepository roomTypeRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private EntityManager entityManager;
-
-    private static final AtomicInteger RESERVATION_SEQ =
-            new AtomicInteger((int) (System.currentTimeMillis() % 1_000_000) + 1_000_000);
 
     //  TEST 1: SAVE REVIEW
     @Test
     @Transactional
     void testSaveReview() {
         // Step 1: Create Reservation
-        Reservation savedReservation = reservationRepository.findById(1).orElse(null);
+        Reservation savedReservation = insertReservation();
 
         // Step 2: Create Review
         Review review = new Review();
@@ -114,8 +110,7 @@ public class ReviewRepositoryTest {
     void saveReview_InvalidRating_ShouldThrowException() {
 
         // 1️⃣ Create reservation (required)
-        Reservation reservation = new Reservation();
-        reservation = reservationRepository.save(reservation);
+        Reservation reservation = insertReservation();
 
         // 2️⃣ Create invalid review
         Review review = new Review();
@@ -132,27 +127,36 @@ public class ReviewRepositoryTest {
 
 
     private Reservation insertReservation() {
-        int id = RESERVATION_SEQ.getAndIncrement();
-        entityManager.createNativeQuery(
-                        "insert into reservation (reservation_id, check_in_date, check_out_date, guest_email, guest_name, guest_phone, room_id) " +
-                                "values (?,?,?,?,?,?,?)")
-                .setParameter(1, id)
-                .setParameter(2, LocalDate.of(2026, 3, 20))
-                .setParameter(3, LocalDate.of(2026, 3, 25))
-                .setParameter(4, "zaid@email.com")
-                .setParameter(5, "Zaid")
-                .setParameter(6, "9876543210")
-                .setParameter(7, null)
-                .executeUpdate();
-        return entityManager.getReference(Reservation.class, id);
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
+
+        RoomType roomType = createRoomType("Standard");
+
+        Room room = new Room();
+        room.setRoomNumber(101);
+        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room = roomRepository.save(room);
+
+        Reservation reservation = new Reservation();
+        reservation.setGuestName("Zaid");
+        reservation.setGuestEmail("zaid@email.com");
+        reservation.setGuest_phone("9876543210");
+        reservation.setCheckInDate(LocalDate.of(2026, 3, 20));
+        reservation.setCheckOutDate(LocalDate.of(2026, 3, 25));
+        reservation.setRoom(room);
+        return reservationRepository.save(reservation);
     }
 
     @Test
     void updateReview_shouldUpdateRatingAndComment() {
 
         // 1️⃣ Create Reservation (required)
-        Reservation reservation = new Reservation();
-        reservation = reservationRepository.save(reservation);
+        Reservation reservation = insertReservation();
 
         // 2️⃣ Create Review
         Review review = new Review();
@@ -190,13 +194,19 @@ public class ReviewRepositoryTest {
         // 2️⃣ Room
         Room room = new Room();
         room.setRoomNumber(101);
-        room.setRoomTypeId(1);
+        RoomType roomType = createRoomType("Suite");
+        room.setRoomTypeId(roomType.getRoomTypeId());
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);
 
         // 3️⃣ Reservation
         Reservation reservation = new Reservation();
+        reservation.setGuestName("Guest");
+        reservation.setGuestEmail("guest@example.com");
+        reservation.setGuest_phone("9876543210");
+        reservation.setCheckInDate(LocalDate.of(2026, 3, 20));
+        reservation.setCheckOutDate(LocalDate.of(2026, 3, 25));
         reservation.setRoom(room);
         reservation = reservationRepository.save(reservation);
 
@@ -226,6 +236,15 @@ public class ReviewRepositoryTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    private RoomType createRoomType(String name) {
+        RoomType roomType = new RoomType();
+        roomType.setTypeName(name + "-" + System.nanoTime());
+        roomType.setDescription("Test type");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(java.math.BigDecimal.valueOf(999.99));
+        return roomTypeRepository.save(roomType);
     }
 
 

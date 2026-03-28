@@ -7,7 +7,9 @@ import com.example.HotelManagement.entity.Hotel;
 import com.example.HotelManagement.entity.Room;
 import com.example.HotelManagement.entity.Review;
 import com.example.HotelManagement.repository.ReviewRepository;
-import com.example.HotelManagement.repository.RoomRepo;
+import com.example.HotelManagement.repository.RoomRepository;
+import com.example.HotelManagement.repository.RoomTypeRepository;
+import com.example.HotelManagement.entity.RoomType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
@@ -37,13 +39,15 @@ public class ReviewApiTest {
     @Autowired
     private HotelRepository hotelRepository;
     @Autowired
-    private RoomRepo roomRepository;
+    private RoomRepository roomRepository;
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
     private ReservationRepository reservationRepository;
     @Autowired
     private MockMvc mockMvc;
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
 
     // TEST 1: SAVE REVIEW
     @Test
@@ -181,13 +185,19 @@ public class ReviewApiTest {
         // 2️⃣ Room
         Room room = new Room();
         room.setRoomNumber(1234);
-        room.setRoomTypeId(1);
+        RoomType roomType = createRoomType("API");
+        room.setRoomTypeId(roomType.getRoomTypeId());
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);
 
         // 3️⃣ Reservation
         Reservation reservation = new Reservation();
+        reservation.setGuestName("Guest");
+        reservation.setGuestEmail("guest@example.com");
+        reservation.setGuest_phone("9876543210");
+        reservation.setCheckInDate(LocalDate.of(2026, 3, 20));
+        reservation.setCheckOutDate(LocalDate.of(2026, 3, 25));
         reservation.setRoom(room);
         reservation = reservationRepository.save(reservation);
 
@@ -204,6 +214,15 @@ public class ReviewApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.reviews[*].comment")
                         .value(org.hamcrest.Matchers.hasItem("API Test Review")));
+    }
+
+    private RoomType createRoomType(String name) {
+        RoomType roomType = new RoomType();
+        roomType.setTypeName(name + "-" + System.nanoTime());
+        roomType.setDescription("Test type");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(java.math.BigDecimal.valueOf(999.99));
+        return roomTypeRepository.save(roomType);
     }
 
 }

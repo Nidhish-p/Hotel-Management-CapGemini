@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
-public class roomApiTest {
+public class RoomApiTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 

@@ -83,4 +83,5 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
         }
         return amenities;
     }
+
 }
