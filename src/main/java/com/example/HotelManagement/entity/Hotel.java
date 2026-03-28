@@ -2,6 +2,7 @@ package com.example.HotelManagement.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,12 +40,13 @@ public class Hotel {
                     foreignKey = @ForeignKey(name = "fk_hotelamenity_hotel")
             ),
             inverseJoinColumns = @JoinColumn(
-                    name = "amenity_id",
+                    name = "amenityId",
                     foreignKey = @ForeignKey(name = "fk_hotelamenity_amenity")
             )
     )
     private List<Amenity> amenities;
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Room> rooms;
     
 }

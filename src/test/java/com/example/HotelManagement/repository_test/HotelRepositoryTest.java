@@ -147,10 +147,10 @@ public class HotelRepositoryTest {
         List<Amenity> amenities = hotelRepository.getAmenityByHotelName("Amenity Hotel");
         assertThat(amenities).hasSize(2);
         assertThat(amenities)
-                .extracting(a -> (Integer) ReflectionTestUtils.getField(a, "amenity_id"))
+                .extracting(a -> (Integer) ReflectionTestUtils.getField(a, "amenityId"))
                 .containsExactlyInAnyOrder(
-                        (Integer) ReflectionTestUtils.getField(wifi, "amenity_id"),
-                        (Integer) ReflectionTestUtils.getField(pool, "amenity_id"));
+                        (Integer) ReflectionTestUtils.getField(wifi, "amenityId"),
+                        (Integer) ReflectionTestUtils.getField(pool, "amenityId"));
     }
 
     // TEST 11: Fetch amenities when none exist
@@ -266,7 +266,7 @@ public class HotelRepositoryTest {
         Room room = new Room();
         room.setRoomNumber(101);
         RoomType roomType = createRoomType("Suite");
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
 
@@ -307,7 +307,7 @@ public class HotelRepositoryTest {
         assertThat(entityManager.find(Reservation.class, reservationId)).isNull();
         assertThat(entityManager.find(Payment.class, paymentId)).isNull();
         assertThat(entityManager.find(Review.class, reviewId)).isNull();
-        Integer wifiId = (Integer) ReflectionTestUtils.getField(wifi, "amenity_id");
+        Integer wifiId = (Integer) ReflectionTestUtils.getField(wifi, "amenityId");
         assertThat(entityManager.find(Amenity.class, wifiId)).isNotNull();
     }
 
@@ -329,8 +329,8 @@ public class HotelRepositoryTest {
         entityManager.flush();
 
         assertThat(hotelRepository.findById(id)).isEmpty();
-        Integer gymId = (Integer) ReflectionTestUtils.getField(gym, "amenity_id");
-        Integer spaId = (Integer) ReflectionTestUtils.getField(spa, "amenity_id");
+        Integer gymId = (Integer) ReflectionTestUtils.getField(gym, "amenityId");
+        Integer spaId = (Integer) ReflectionTestUtils.getField(spa, "amenityId");
         assertThat(entityManager.find(Amenity.class, gymId)).isNotNull();
         assertThat(entityManager.find(Amenity.class, spaId)).isNotNull();
     }
