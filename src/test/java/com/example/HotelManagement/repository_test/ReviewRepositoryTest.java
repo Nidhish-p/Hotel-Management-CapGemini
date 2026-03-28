@@ -1,22 +1,35 @@
 package com.example.HotelManagement.repository_test;
 import com.example.HotelManagement.entity.Review;
+import com.example.HotelManagement.entity.Hotel;
+import com.example.HotelManagement.entity.Room;
 import com.example.HotelManagement.entity.Reservation;
 import com.example.HotelManagement.repository.ReservationRepository;
 import com.example.HotelManagement.repository.ReviewRepository;
+import com.example.HotelManagement.repository.HotelRepository;
+import com.example.HotelManagement.repository.RoomRepo;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Transactional
+@Rollback
 @SpringBootTest
 public class ReviewRepositoryTest {
+
+    @Autowired
+    HotelRepository hotelRepository;
+    @Autowired
+    RoomRepo roomRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
@@ -33,7 +46,7 @@ public class ReviewRepositoryTest {
     @Transactional
     void testSaveReview() {
         // Step 1: Create Reservation
-        Reservation savedReservation = insertReservation();
+        Reservation savedReservation = reservationRepository.findById(1).orElse(null);
 
         // Step 2: Create Review
         Review review = new Review();
@@ -94,8 +107,29 @@ public class ReviewRepositoryTest {
         assertThrows(Exception.class, () -> {
             reviewRepository.saveAndFlush(review); // force DB check
         });
-        
+
     }
+
+    @Test
+    void saveReview_InvalidRating_ShouldThrowException() {
+
+        // 1️⃣ Create reservation (required)
+        Reservation reservation = new Reservation();
+        reservation = reservationRepository.save(reservation);
+
+        // 2️⃣ Create invalid review
+        Review review = new Review();
+        review.setReview_date(LocalDate.now());
+        review.setRating(10); // ❌ invalid
+        review.setComment("Invalid rating test");
+        review.setReservation(reservation);
+
+        // 3️⃣ Expect exception
+        assertThrows(ConstraintViolationException.class, () -> {
+            reviewRepository.save(review);
+        });
+    }
+
 
     private Reservation insertReservation() {
         int id = RESERVATION_SEQ.getAndIncrement();
@@ -112,5 +146,89 @@ public class ReviewRepositoryTest {
                 .executeUpdate();
         return entityManager.getReference(Reservation.class, id);
     }
+
+    @Test
+    void updateReview_shouldUpdateRatingAndComment() {
+
+        // 1️⃣ Create Reservation (required)
+        Reservation reservation = new Reservation();
+        reservation = reservationRepository.save(reservation);
+
+        // 2️⃣ Create Review
+        Review review = new Review();
+        review.setReview_date(LocalDate.now());
+        review.setRating(3);
+        review.setComment("Average stay");
+        review.setReservation(reservation);
+
+        Review savedReview = reviewRepository.save(review);
+
+        // 3️⃣ Update fields
+        savedReview.setRating(5);
+        savedReview.setComment("Excellent stay!");
+
+        reviewRepository.save(savedReview);
+
+        // 4️⃣ Fetch again
+        Review updated = reviewRepository.findById(savedReview.getReview_id()).orElse(null);
+
+        // 5️⃣ Assertions
+        assertNotNull(updated);
+        assertEquals(5, updated.getRating());
+        assertEquals("Excellent stay!", updated.getComment());
+    }
+    @Test
+    void findReviewsByHotelId_shouldContainInsertedReview() {
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
+
+        Integer hotelId = hotel.getHotelId(); // 🔥 IMPORTANT
+
+        // 2️⃣ Room
+        Room room = new Room();
+        room.setRoomNumber(101);
+        room.setRoomTypeId(1);
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room = roomRepository.save(room);
+
+        // 3️⃣ Reservation
+        Reservation reservation = new Reservation();
+        reservation.setRoom(room);
+        reservation = reservationRepository.save(reservation);
+
+        // 4️⃣ Review
+        Review review = new Review();
+        review.setRating(5);
+        review.setComment("Unique Test");
+        review.setReview_date(LocalDate.now());
+        review.setReservation(reservation);
+        review = reviewRepository.save(review);
+
+        // 5️⃣ Query
+        List<Review> result =
+                reviewRepository.findDistinctByReservationRoomHotelHotelId(hotelId);
+
+
+        Review savedReview = reviewRepository.save(review); // ✅ new variable
+
+        assertTrue(result.stream()
+                .anyMatch(r -> r.getReview_id().equals(savedReview.getReview_id())));
+    }
+    @Test
+    void findReviewsByHotelId_shouldReturnEmpty_whenNoMatch() {
+
+        List<Review> result =
+                reviewRepository.findDistinctByReservationRoomHotelHotelId(999);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+
+
 
 }
