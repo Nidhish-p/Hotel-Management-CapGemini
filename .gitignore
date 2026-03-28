@@ -32,4 +32,7 @@ build/
 resources/
 .vscode/
 pom.xml
+src/main/resources/data.sql
+src/main/resources/application.properties
+src/test/resources/application.properties
 *.properties

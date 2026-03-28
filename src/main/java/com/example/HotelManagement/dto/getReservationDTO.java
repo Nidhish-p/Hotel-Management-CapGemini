@@ -10,9 +10,9 @@ import com.example.HotelManagement.entity.Reservation;
 public interface getReservationDTO {
 
     Integer getReservation_id();
-    String getGuest_name();
-    String getGuest_email();
+    String getGuestName();
+    String getGuestEmail();
     String getGuest_phone();
-    LocalDate getCheck_in_date();
-    LocalDate getCheck_out_date();
+    LocalDate getCheckInDate();
+    LocalDate getCheckOutDate();
 }

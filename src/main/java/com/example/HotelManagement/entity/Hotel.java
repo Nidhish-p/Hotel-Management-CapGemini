@@ -2,12 +2,7 @@ package com.example.HotelManagement.entity;
 
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -23,7 +18,9 @@ import lombok.Setter;
 public class Hotel {
 
     @Id
-    int hotel_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="hotel_id")
+    int hotelId;
 
     String name;
     String location;
@@ -31,16 +28,18 @@ public class Hotel {
 
     @ManyToMany
     @JoinTable(
-        name = "hotelamenity",
-        joinColumns = @JoinColumn(
-                name = "hotel_id",
-                foreignKey = @ForeignKey(name = "fk_hotelamenity_hotel")
-        ),
-        inverseJoinColumns = @JoinColumn(
-                name = "amenity_id",
-                foreignKey = @ForeignKey(name = "fk_hotelamenity_amenity")
-        )
+            name = "hotelamenity",
+            joinColumns = @JoinColumn(
+                    name = "hotel_id",
+                    foreignKey = @ForeignKey(name = "fk_hotelamenity_hotel")
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "amenity_id",
+                    foreignKey = @ForeignKey(name = "fk_hotelamenity_amenity")
+            )
     )
     private List<Amenity> amenities;
+    @OneToMany(mappedBy = "hotel")
+    private List<Room> rooms;
     
 }
