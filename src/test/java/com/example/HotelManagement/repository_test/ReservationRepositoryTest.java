@@ -196,7 +196,7 @@ class ReservationRepositoryTest {
 
         Room room = new Room();
         room.setRoomNumber(101);
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
         return roomRepository.save(room);

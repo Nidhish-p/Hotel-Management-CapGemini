@@ -186,7 +186,7 @@ public class ReviewApiTest {
         Room room = new Room();
         room.setRoomNumber(1234);
         RoomType roomType = createRoomType("API");
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);

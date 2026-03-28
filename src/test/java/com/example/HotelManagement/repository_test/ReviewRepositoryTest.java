@@ -137,7 +137,7 @@ public class ReviewRepositoryTest {
 
         Room room = new Room();
         room.setRoomNumber(101);
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);
@@ -195,7 +195,7 @@ public class ReviewRepositoryTest {
         Room room = new Room();
         room.setRoomNumber(101);
         RoomType roomType = createRoomType("Suite");
-        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);
