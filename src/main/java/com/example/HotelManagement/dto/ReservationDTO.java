@@ -7,7 +7,7 @@ import org.springframework.data.rest.core.config.Projection;
 import com.example.HotelManagement.entity.Reservation;
 
 @Projection(name = "getReservationDTO", types = Reservation.class)
-public interface getReservationDTO {
+public interface ReservationDTO {
 
     Integer getReservation_id();
     String getGuestName();

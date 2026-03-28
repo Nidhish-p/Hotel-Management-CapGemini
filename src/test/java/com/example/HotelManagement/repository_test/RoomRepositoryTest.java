@@ -13,18 +13,29 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 
 import com.example.HotelManagement.entity.Room;
-import com.example.HotelManagement.repository.RoomRepo;
+import com.example.HotelManagement.entity.RoomType;
+import com.example.HotelManagement.repository.RoomRepository;
+import com.example.HotelManagement.repository.RoomTypeRepository;
 
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class roomRepoTest {
+class RoomRepositoryTest {
 
     @Autowired
-    private RoomRepo roomRepo;
+    private RoomRepository roomRepo;
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
 
     @Test
     void testFindAllRooms() {
+        Room room = new Room();
+        room.setRoomNumber(999);
+        RoomType roomType = createRoomType("Basic");
+        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setIsAvailable(true);
+        roomRepo.save(room);
+
         List<Room> rooms = roomRepo.findAll();
         assertNotNull(rooms);
         assertTrue(rooms.size() > 0);
@@ -32,17 +43,24 @@ class roomRepoTest {
 
     @Test
     void testFindRoomById() {
-        Room room = roomRepo.findById(1).orElse(null);
-        assertNotNull(room);
-        assertEquals(101, room.getRoomNumber());
+        Room room = new Room();
+        room.setRoomNumber(101);
+        RoomType roomType = createRoomType("Standard");
+        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setIsAvailable(true);
+
+        Room savedRoom = roomRepo.save(room);
+        Room found = roomRepo.findById(savedRoom.getRoomId()).orElse(null);
+        assertNotNull(found);
+        assertEquals(101, found.getRoomNumber());
     }
 
     @Test
     void testAddRoom() {
         Room room = new Room();
-        room.setRoomId(100);
         room.setRoomNumber(999);
-        room.setRoomTypeId(1);
+        RoomType roomType = createRoomType("Deluxe");
+        room.setRoomTypeId(roomType.getRoomTypeId());
         room.setIsAvailable(true);
 
         Room savedRoom = roomRepo.save(room);
@@ -54,9 +72,9 @@ class roomRepoTest {
     void testUpdateRoom() {
         // Create a room first
         Room room = new Room();
-        room.setRoomId(1);
         room.setRoomNumber(101);
-        room.setRoomTypeId(1);
+        RoomType roomType = createRoomType("Suite");
+        room.setRoomTypeId(roomType.getRoomTypeId());
         
         room.setIsAvailable(true);
 
@@ -74,14 +92,23 @@ class roomRepoTest {
     @Test
     void testDeleteRoom() {
         Room room = new Room();
-        room.setRoomId(200);
         room.setRoomNumber(888);
-        room.setRoomTypeId(2);
+        RoomType roomType = createRoomType("Economy");
+        room.setRoomTypeId(roomType.getRoomTypeId());
         room.setIsAvailable(true);
 
-        roomRepo.save(room);
-        roomRepo.deleteById(200);
+        Room savedRoom = roomRepo.save(room);
+        roomRepo.deleteById(savedRoom.getRoomId());
 
-        assertFalse(roomRepo.findById(200).isPresent());
+        assertFalse(roomRepo.findById(savedRoom.getRoomId()).isPresent());
+    }
+
+    private RoomType createRoomType(String name) {
+        RoomType roomType = new RoomType();
+        roomType.setTypeName(name + "-" + System.nanoTime());
+        roomType.setDescription("Test type");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(java.math.BigDecimal.valueOf(999.99));
+        return roomTypeRepository.save(roomType);
     }
 }

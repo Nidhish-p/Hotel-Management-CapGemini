@@ -19,12 +19,17 @@ public class Hotel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="hotel_id")
-    int hotelId;
+    @Column(name = "hotel_id", nullable = false)
+    private int hotelId;
 
-    String name;
-    String location;
-    String description;
+    @Column(name = "name", length = 255, nullable = true)
+    private String name;
+
+    @Column(name = "location", length = 255, nullable = true)
+    private String location;
+
+    @Column(name = "description", length = 255, nullable = true)
+    private String description;
 
     @ManyToMany
     @JoinTable(
@@ -39,7 +44,7 @@ public class Hotel {
             )
     )
     private List<Amenity> amenities;
-    @OneToMany(mappedBy = "hotel")
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms;
     
 }
