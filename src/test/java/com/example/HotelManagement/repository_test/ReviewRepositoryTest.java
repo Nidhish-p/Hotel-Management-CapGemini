@@ -1,32 +1,41 @@
 package com.example.HotelManagement.repository_test;
 import com.example.HotelManagement.entity.Review;
+import com.example.HotelManagement.entity.Hotel;
+import com.example.HotelManagement.entity.Room;
 import com.example.HotelManagement.entity.Reservation;
+import com.example.HotelManagement.entity.RoomType;
 import com.example.HotelManagement.repository.ReservationRepository;
 import com.example.HotelManagement.repository.ReviewRepository;
+import com.example.HotelManagement.repository.HotelRepository;
+import com.example.HotelManagement.repository.RoomRepository;
+import com.example.HotelManagement.repository.RoomTypeRepository;
+import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@Transactional
+@Rollback
 @SpringBootTest
 public class ReviewRepositoryTest {
+
+    @Autowired
+    HotelRepository hotelRepository;
+    @Autowired
+    RoomRepository roomRepository;
+    @Autowired
+    RoomTypeRepository roomTypeRepository;
 
     @Autowired
     private ReviewRepository reviewRepository;
     @Autowired
     private ReservationRepository reservationRepository;
-    @Autowired
-    private EntityManager entityManager;
-
-    private static final AtomicInteger RESERVATION_SEQ =
-            new AtomicInteger((int) (System.currentTimeMillis() % 1_000_000) + 1_000_000);
 
     //  TEST 1: SAVE REVIEW
     @Test
@@ -94,23 +103,151 @@ public class ReviewRepositoryTest {
         assertThrows(Exception.class, () -> {
             reviewRepository.saveAndFlush(review); // force DB check
         });
-        
+
     }
 
-    private Reservation insertReservation() {
-        int id = RESERVATION_SEQ.getAndIncrement();
-        entityManager.createNativeQuery(
-                        "insert into reservation (reservation_id, check_in_date, check_out_date, guest_email, guest_name, guest_phone, room_id) " +
-                                "values (?,?,?,?,?,?,?)")
-                .setParameter(1, id)
-                .setParameter(2, LocalDate.of(2026, 3, 20))
-                .setParameter(3, LocalDate.of(2026, 3, 25))
-                .setParameter(4, "zaid@email.com")
-                .setParameter(5, "Zaid")
-                .setParameter(6, "9876543210")
-                .setParameter(7, null)
-                .executeUpdate();
-        return entityManager.getReference(Reservation.class, id);
+    @Test
+    void saveReview_InvalidRating_ShouldThrowException() {
+
+        // 1️⃣ Create reservation (required)
+        Reservation reservation = insertReservation();
+
+        // 2️⃣ Create invalid review
+        Review review = new Review();
+        review.setReview_date(LocalDate.now());
+        review.setRating(10); // ❌ invalid
+        review.setComment("Invalid rating test");
+        review.setReservation(reservation);
+
+        // 3️⃣ Expect exception
+        assertThrows(ConstraintViolationException.class, () -> {
+            reviewRepository.save(review);
+        });
     }
+
+
+    private Reservation insertReservation() {
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
+
+        RoomType roomType = createRoomType("Standard");
+
+        Room room = new Room();
+        room.setRoomNumber(101);
+        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room = roomRepository.save(room);
+
+        Reservation reservation = new Reservation();
+        reservation.setGuestName("Zaid");
+        reservation.setGuestEmail("zaid@email.com");
+        reservation.setGuest_phone("9876543210");
+        reservation.setCheckInDate(LocalDate.of(2026, 3, 20));
+        reservation.setCheckOutDate(LocalDate.of(2026, 3, 25));
+        reservation.setRoom(room);
+        return reservationRepository.save(reservation);
+    }
+
+    @Test
+    void updateReview_shouldUpdateRatingAndComment() {
+
+        // 1️⃣ Create Reservation (required)
+        Reservation reservation = insertReservation();
+
+        // 2️⃣ Create Review
+        Review review = new Review();
+        review.setReview_date(LocalDate.now());
+        review.setRating(3);
+        review.setComment("Average stay");
+        review.setReservation(reservation);
+
+        Review savedReview = reviewRepository.save(review);
+
+        // 3️⃣ Update fields
+        savedReview.setRating(5);
+        savedReview.setComment("Excellent stay!");
+
+        reviewRepository.save(savedReview);
+
+        // 4️⃣ Fetch again
+        Review updated = reviewRepository.findById(savedReview.getReview_id()).orElse(null);
+
+        // 5️⃣ Assertions
+        assertNotNull(updated);
+        assertEquals(5, updated.getRating());
+        assertEquals("Excellent stay!", updated.getComment());
+    }
+    @Test
+    void findReviewsByHotelId_shouldContainInsertedReview() {
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
+
+        Integer hotelId = hotel.getHotelId(); // 🔥 IMPORTANT
+
+        // 2️⃣ Room
+        Room room = new Room();
+        room.setRoomNumber(101);
+        RoomType roomType = createRoomType("Suite");
+        room.setRoomTypeId(roomType.getRoomTypeId());
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room = roomRepository.save(room);
+
+        // 3️⃣ Reservation
+        Reservation reservation = new Reservation();
+        reservation.setGuestName("Guest");
+        reservation.setGuestEmail("guest@example.com");
+        reservation.setGuest_phone("9876543210");
+        reservation.setCheckInDate(LocalDate.of(2026, 3, 20));
+        reservation.setCheckOutDate(LocalDate.of(2026, 3, 25));
+        reservation.setRoom(room);
+        reservation = reservationRepository.save(reservation);
+
+        // 4️⃣ Review
+        Review review = new Review();
+        review.setRating(5);
+        review.setComment("Unique Test");
+        review.setReview_date(LocalDate.now());
+        review.setReservation(reservation);
+        review = reviewRepository.save(review);
+
+        // 5️⃣ Query
+        List<Review> result =
+                reviewRepository.findDistinctByReservationRoomHotelHotelId(hotelId);
+
+
+        Review savedReview = reviewRepository.save(review); // ✅ new variable
+
+        assertTrue(result.stream()
+                .anyMatch(r -> r.getReview_id().equals(savedReview.getReview_id())));
+    }
+    @Test
+    void findReviewsByHotelId_shouldReturnEmpty_whenNoMatch() {
+
+        List<Review> result =
+                reviewRepository.findDistinctByReservationRoomHotelHotelId(999);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    private RoomType createRoomType(String name) {
+        RoomType roomType = new RoomType();
+        roomType.setTypeName(name + "-" + System.nanoTime());
+        roomType.setDescription("Test type");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(java.math.BigDecimal.valueOf(999.99));
+        return roomTypeRepository.save(roomType);
+    }
+
+
+
 
 }
