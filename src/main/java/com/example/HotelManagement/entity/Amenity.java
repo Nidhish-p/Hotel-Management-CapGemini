@@ -21,5 +21,8 @@ public class Amenity {
 
     @ManyToMany(mappedBy = "amenities")
     private List<Hotel> hotels;
+
+    @ManyToMany(mappedBy = "amenities")
+    private List<Room> rooms;
     
 }

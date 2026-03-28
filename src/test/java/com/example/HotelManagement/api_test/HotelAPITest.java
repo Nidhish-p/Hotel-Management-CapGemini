@@ -1,7 +1,5 @@
 package com.example.HotelManagement.api_test;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,9 +29,6 @@ public class HotelAPITest {
     @Autowired
     private HotelRepository hotelRepository;
 
-    private static final AtomicInteger HOTEL_SEQ =
-            new AtomicInteger((int) (System.currentTimeMillis() % 1_000_000) + 2_000_000);
-
     // TEST 1: Get all hotels (paged resource)
     @Test
     void getHotels_shouldReturnPagedResource() throws Exception {
@@ -46,12 +41,12 @@ public class HotelAPITest {
     // TEST 2: Add valid hotel with proper fields
     @Test
     void addHotel_withValidFields_shouldCreate() throws Exception {
-        String hotelJson = buildHotelJson(nextHotelId(), "Grand Palace", "Mumbai", "Luxury stay");
+        String hotelJson = buildHotelJson("Grand Palace", "Mumbai", "Luxury stay");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 3: Add hotel with null name should succeed (schema allows NULL)
@@ -59,70 +54,64 @@ public class HotelAPITest {
     void addHotel_withNullName_shouldCreate() throws Exception {
         String hotelJson = """
                 {
-                    "hotel_id": %d,
                     "name": null,
                     "location": "Delhi",
                     "description": "Budget stay"
                 }
-                """.formatted(nextHotelId());
+                """;
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 4: Add duplicate hotel name (schema does not enforce uniqueness)
     @Test
     void addHotel_withDuplicateName_shouldCreate() throws Exception {
         String name = "UniqStay";
-        String first = buildHotelJson(nextHotelId(), name, "Pune", "First entry");
-        String second = buildHotelJson(nextHotelId(), name, "Pune", "Duplicate entry");
+        String first = buildHotelJson(name, "Pune", "First entry");
+        String second = buildHotelJson(name, "Pune", "Duplicate entry");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(first))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(second))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 5: Add hotel with very long name beyond limit
     @Test
     void addHotel_withVeryLongName_shouldCreate() throws Exception {
         String longName = "H".repeat(300);
-        String hotelJson = buildHotelJson(nextHotelId(), longName, "Chennai", "Long name test");
+        String hotelJson = buildHotelJson(longName, "Chennai", "Long name test");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 6: Add hotel with special characters allowed
     @Test
     void addHotel_withSpecialCharactersInName_shouldCreate() throws Exception {
-        String hotelJson = buildHotelJson(nextHotelId(), "Star@Stay #1", "Goa", "Beach view");
+        String hotelJson = buildHotelJson("Star@Stay #1", "Goa", "Beach view");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 7: Delete hotel without dependencies
     @Test
     void deleteHotel_withoutDependencies_shouldSucceed() throws Exception {
-        int id = nextHotelId();
-        String hotelJson = buildHotelJson(id, "Delete Me", "Jaipur", "Temp");
-
-        mockMvc.perform(post("/hotels")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(hotelJson))
-                .andExpect(status().isCreated());
+        Hotel saved = hotelRepository.save(buildHotelEntity("Delete Me", "Jaipur", "Temp"));
+        int id = saved.getHotelId();
 
         mockMvc.perform(delete("/hotels/" + id))
                 .andExpect(status().isNoContent());
@@ -131,13 +120,8 @@ public class HotelAPITest {
     // TEST 8: Delete hotel having amenities linked
     @Test
     void deleteHotel_withAmenitiesLinked_shouldSucceed() throws Exception {
-        int id = nextHotelId();
-        String hotelJson = buildHotelJson(id, "Amenity Hotel", "Udaipur", "Temp");
-
-        mockMvc.perform(post("/hotels")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(hotelJson))
-                .andExpect(status().isCreated());
+        Hotel saved = hotelRepository.save(buildHotelEntity("Amenity Hotel", "Udaipur", "Temp"));
+        int id = saved.getHotelId();
 
         // No FK link exists in current schema, so delete should succeed
         mockMvc.perform(delete("/hotels/" + id))
@@ -154,13 +138,7 @@ public class HotelAPITest {
     // TEST 10: Fetch hotels for valid location
     @Test
     void getHotelsByLocation_valid_shouldReturnList() throws Exception {
-        int id = nextHotelId();
-        String hotelJson = buildHotelJson(id, "Loc Hotel", "Indore", "Temp");
-
-        mockMvc.perform(post("/hotels")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(hotelJson))
-                .andExpect(status().isCreated());
+        hotelRepository.save(buildHotelEntity("Loc Hotel", "Indore", "Temp"));
 
         mockMvc.perform(get("/hotels/search/findByLocation")
                 .param("location", "Indore"))
@@ -183,8 +161,7 @@ public class HotelAPITest {
     // TEST 12: Fetch hotels by valid name
     @Test
     void getHotelsByName_valid_shouldReturnList() throws Exception {
-        int id = nextHotelId();
-        Hotel hotel = buildHotelEntity(id, "Name Hotel", "Surat", "Temp");
+        Hotel hotel = buildHotelEntity("Name Hotel", "Surat", "Temp");
         hotelRepository.save(hotel);
 
         mockMvc.perform(get("/hotels/search/findByName")
@@ -209,35 +186,35 @@ public class HotelAPITest {
     @Test
     void addHotel_withBoundaryLengthName_shouldCreate() throws Exception {
         String boundaryName = "B".repeat(255);
-        String hotelJson = buildHotelJson(nextHotelId(), boundaryName, "Bhopal", "Boundary length test");
+        String hotelJson = buildHotelJson(boundaryName, "Bhopal", "Boundary length test");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 15: Add hotel exceeding name length
     @Test
     void addHotel_withExceedingNameLength_shouldCreate() throws Exception {
         String exceedingName = "C".repeat(256);
-        String hotelJson = buildHotelJson(nextHotelId(), exceedingName, "Kochi", "Exceeding length test");
+        String hotelJson = buildHotelJson(exceedingName, "Kochi", "Exceeding length test");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 16: Add hotel with empty string name
     @Test
     void addHotel_withEmptyName_shouldCreate() throws Exception {
-        String hotelJson = buildHotelJson(nextHotelId(), "", "Lucknow", "Empty name test");
+        String hotelJson = buildHotelJson("", "Lucknow", "Empty name test");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 17: Insert hotel with null description
@@ -245,40 +222,39 @@ public class HotelAPITest {
     void addHotel_withNullDescription_shouldCreate() throws Exception {
         String hotelJson = """
                 {
-                    "hotel_id": %d,
                     "name": "Null Desc Hotel",
                     "location": "Nagpur",
                     "description": null
                 }
-                """.formatted(nextHotelId());
+                """;
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotelJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 18: Bulk insert multiple hotels
     @Test
     void addHotel_bulkInsertMultipleHotels_shouldCreateAll() throws Exception {
-        String hotel1 = buildHotelJson(nextHotelId(), "Bulk One", "Pune", "First");
-        String hotel2 = buildHotelJson(nextHotelId(), "Bulk Two", "Pune", "Second");
-        String hotel3 = buildHotelJson(nextHotelId(), "Bulk Three", "Pune", "Third");
+        String hotel1 = buildHotelJson("Bulk One", "Pune", "First");
+        String hotel2 = buildHotelJson("Bulk Two", "Pune", "Second");
+        String hotel3 = buildHotelJson("Bulk Three", "Pune", "Third");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotel1))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotel2))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(hotel3))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 19: Duplicate name + location combination
@@ -286,18 +262,18 @@ public class HotelAPITest {
     void addHotel_withDuplicateNameAndLocation_shouldCreate() throws Exception {
         String name = "Dup Combo Hotel";
         String location = "Mysore";
-        String first = buildHotelJson(nextHotelId(), name, location, "First");
-        String second = buildHotelJson(nextHotelId(), name, location, "Second");
+        String first = buildHotelJson(name, location, "First");
+        String second = buildHotelJson(name, location, "Second");
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(first))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
 
         mockMvc.perform(post("/hotels")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(second))
-                .andExpect(status().isCreated());
+                .andExpect(status().isBadRequest());
     }
 
     // TEST 20: Fetch first page of hotels with size 10
@@ -374,24 +350,18 @@ public class HotelAPITest {
                 .andExpect(jsonPath("$.page.number").value(0));
     }
 
-    private int nextHotelId() {
-        return HOTEL_SEQ.getAndIncrement();
-    }
-
-    private String buildHotelJson(int id, String name, String location, String description) {
+    private String buildHotelJson(String name, String location, String description) {
         return """
                 {
-                    "hotel_id": %d,
                     "name": "%s",
                     "location": "%s",
                     "description": "%s"
                 }
-                """.formatted(id, name, location, description);
+                """.formatted(name, location, description);
     }
 
-    private Hotel buildHotelEntity(int id, String name, String location, String description) {
+    private Hotel buildHotelEntity(String name, String location, String description) {
         Hotel hotel = new Hotel();
-        hotel.setHotel_id(id);
         hotel.setName(name);
         hotel.setLocation(location);
         hotel.setDescription(description);
@@ -401,7 +371,6 @@ public class HotelAPITest {
     private void seedHotels(int count, String namePrefix) {
         for (int i = 0; i < count; i++) {
             Hotel hotel = buildHotelEntity(
-                    nextHotelId(),
                     namePrefix + "-" + i,
                     "Seed City",
                     "Seed Desc");

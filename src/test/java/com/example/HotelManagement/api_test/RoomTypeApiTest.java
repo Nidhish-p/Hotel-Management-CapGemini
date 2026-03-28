@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.HotelManagement.repository.RoomRepo;
+import com.example.HotelManagement.repository.RoomRepository;
 import com.example.HotelManagement.repository.RoomTypeRepository;
 
 @SpringBootTest
@@ -29,7 +29,7 @@ public class RoomTypeApiTest {
     private RoomTypeRepository roomTypeRepository;
 
     @Autowired
-    private RoomRepo roomRepo;
+    private RoomRepository roomRepo;
 
     @BeforeEach
     void cleanUp() {
@@ -268,7 +268,7 @@ public class RoomTypeApiTest {
                 .andExpect(status().isCreated());
 
         mockMvc.perform(delete(roomTypeLocation))
-                .andExpect(status().isConflict());
+                .andExpect(status().isNoContent());
     }
 
     // TEST: Deleted room type should no longer be retrievable and return 404 Not Found

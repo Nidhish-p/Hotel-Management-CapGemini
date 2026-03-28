@@ -2,8 +2,10 @@ package com.example.HotelManagement.entity;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,10 +36,10 @@ public class Reservation {
     private LocalDate checkInDate;
     @Column(name = "check_out_date")
     private LocalDate checkOutDate;
-    @OneToMany(mappedBy = "reservation")
-    private List<Payment> payments;
-    @OneToMany(mappedBy = "reservation")
-    private List<Review> reviews;
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>();
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name="room_id")

@@ -2,13 +2,15 @@ package com.example.HotelManagement.entity;
 
 import java.util.List;
 
-import jakarta.persistence.*;
 import jakarta.persistence.Entity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,13 +30,19 @@ public class Room {
     Integer roomNumber;
     Integer roomTypeId;
     Boolean isAvailable;
-    Integer hotelId;
 
-    @OneToMany(mappedBy="room")
+    @OneToMany(mappedBy="room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservation;
 
+    @ManyToMany
+    @JoinTable(
+            name = "roomamenity",
+            joinColumns = @JoinColumn(name = "room_id"),
+            inverseJoinColumns = @JoinColumn(name = "amenity_id")
+    )
+    private List<Amenity> amenities;
+    
     @ManyToOne
     @JoinColumn(name="hotel_id")
-    private Hotel hotel;
-
+    Hotel hotel;
 }
