@@ -150,7 +150,6 @@ class RoomApiTest {
                 .andExpect(jsonPath("$._embedded.amenities", hasSize(0)));
     }
     @Test
-    @DisplayName("Full 3-page flow: hotel → rooms → amenities via HAL links")
     void fullNavigationFlow_hotelToRoomsToAmenities() throws Exception {
 
         // Page 1 — get hotelA
@@ -160,7 +159,7 @@ class RoomApiTest {
                 .andExpect(jsonPath("$._links.rooms.href").exists());
 
         // Page 2 — get rooms for hotelA
-        mockMvc.perform(get("/rooms/search/findByHotel")
+        mockMvc.perform(get("/rooms/search/byHotel")
                         .param("hotelId", String.valueOf(hotelA.getHotelId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.rooms", hasSize(2)))
