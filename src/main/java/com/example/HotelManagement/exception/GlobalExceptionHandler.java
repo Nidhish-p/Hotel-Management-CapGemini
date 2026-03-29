@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        return new ResponseEntity<>("Data integrity violation", HttpStatus.CONFLICT);
+        return new ResponseEntity<>("Invalid request: data constraint violation", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
