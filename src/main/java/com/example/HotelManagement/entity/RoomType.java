@@ -1,6 +1,7 @@
 package com.example.HotelManagement.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,5 +41,6 @@ public class RoomType {
 
     @Column(name = "price_per_night", precision = 10, scale = 2)
     private BigDecimal pricePerNight;
+
 
 }
