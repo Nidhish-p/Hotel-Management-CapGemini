@@ -18,6 +18,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,12 +30,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
+@Rollback
 public class ReviewApiTest {
     @Autowired
     private HotelRepository hotelRepository;
@@ -53,19 +56,51 @@ public class ReviewApiTest {
     @Test
     void testSaveReview() throws Exception {
 
-        String reviewJson = """
-                {
-                    "review_date": "2026-03-25",
-                    "rating": 5,
-                    "comment": "Excellent stay!"
-                }
-                """;
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
 
+        // RoomType
+        RoomType roomType = new RoomType();
+        roomType.setTypeName("Deluxe");
+        roomType = roomTypeRepository.save(roomType);
+
+        // Room
+        Room room = new Room();
+        room.setRoomNumber(101);
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room.setRoomType(roomType);
+        room = roomRepository.save(room);
+
+        // Reservation
+        Reservation reservation = new Reservation();
+        reservation.setGuestName("Zaid");
+        reservation.setCheckInDate(LocalDate.now());
+        reservation.setCheckOutDate(LocalDate.now().plusDays(2));
+        reservation.setRoom(room);
+        reservation = reservationRepository.save(reservation);
+
+        //  Create
+
+        String reviewJson = """
+            {
+                "review_date": "2026-03-25",
+                "rating": 5,
+                "comment": "Excellent stay!",
+                "reservation": "/reservations/%d"
+            }
+            """.formatted(reservation.getReservation_id());
+
+        // 3️⃣ API Call
         mockMvc.perform(post("/review")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(reviewJson))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reviewJson))
                 .andExpect(status().isCreated());
     }
+
 
     @Test
     void testSaveReviewWithInvalidReservationAPI() throws Exception {
@@ -81,7 +116,7 @@ public class ReviewApiTest {
         String location = mockMvc.perform(post("/review")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(reviewJson))
-                .andExpect(status().isCreated()) // ✅ EXPECT SUCCESS
+                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getHeader("Location");
@@ -208,13 +243,135 @@ public class ReviewApiTest {
         review.setReview_date(LocalDate.now());
         review.setReservation(reservation);
 
-        Review savedReview = reviewRepository.save(review); // 🔥 important
+        Review savedReview = reviewRepository.save(review); // important
         mockMvc.perform(get("/review/search/findDistinctByReservationRoomHotelHotelId")
                         .param("hotelId", hotelId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.reviews[*].comment")
                         .value(org.hamcrest.Matchers.hasItem("API Test Review")));
     }
+    @Test
+    void getReviewDetails_shouldReturnFullData() throws Exception {
+
+        // 🔹 Hotel
+        Hotel hotel = new Hotel();
+        hotel.setName("Test Hotel");
+        hotel.setLocation("City");
+        hotel.setDescription("Desc");
+        hotel = hotelRepository.save(hotel);
+
+        // 🔹 RoomType
+        RoomType roomType = new RoomType();
+        roomType.setTypeName("Deluxe");
+        roomType.setDescription("Nice room");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(BigDecimal.valueOf(2000));
+        roomType = roomTypeRepository.save(roomType);
+
+        // 🔹 Room
+        Room room = new Room();
+        room.setRoomNumber(101);
+        room.setIsAvailable(true);
+        room.setHotel(hotel);
+        room.setRoomType(roomType);
+        room = roomRepository.save(room);
+
+        // 🔹 Reservation
+        Reservation res = new Reservation();
+        res.setGuestName("Zaid");
+        res.setCheckInDate(LocalDate.now());
+        res.setCheckOutDate(LocalDate.now().plusDays(2));
+        res.setRoom(room);
+        res = reservationRepository.save(res);
+
+        // 🔹 Review
+        Review review = new Review();
+        review.setComment("Great stay");
+        review.setRating(5);
+        review.setReview_date(LocalDate.now());
+        review.setReservation(res);
+        review = reviewRepository.save(review);
+
+
+        mockMvc.perform(get("/custom-review/" + review.getReview_id()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reviewId").value(review.getReview_id()))
+                .andExpect(jsonPath("$.guestName").value("Zaid"))
+                .andExpect(jsonPath("$.roomNumber").value(101))
+                .andExpect(jsonPath("$.roomType").value("Deluxe"));
+    }
+    @Test
+    void getReviewDetails_shouldReturn404_whenNotFound() throws Exception {
+
+        mockMvc.perform(get("/custom-review/99999"))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    void testGetReviewsWithPagination() throws Exception {
+
+        // Insert some reviews (no assumption about DB state)
+        for (int i = 1; i <= 10; i++) {
+            Review review = new Review();
+            review.setRating(i % 5);
+            review.setComment("API Review " + i);
+            review.setReview_date(LocalDate.now());
+
+            reviewRepository.save(review);
+        }
+
+        reviewRepository.flush();
+
+        mockMvc.perform(get("/review")
+                        .param("page", "0")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$._embedded.reviews.length()").value(5))
+                .andExpect(jsonPath("$.page.size").value(5))
+                .andExpect(jsonPath("$.page.number").value(0));
+    }
+    @Test
+    void testGetReviewsSecondPage() throws Exception {
+
+        for (int i = 1; i <= 10; i++) {
+            Review review = new Review();
+            review.setRating(i % 5);
+            review.setComment("Page2 Review " + i);
+            review.setReview_date(LocalDate.now());
+
+            reviewRepository.save(review);
+        }
+
+        reviewRepository.flush();
+
+        mockMvc.perform(get("/review")
+                        .param("page", "1")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.reviews.length()").value(5))
+                .andExpect(jsonPath("$.page.number").value(1));
+    }
+    @Test
+    void testGetReviewsEmptyPage() throws Exception {
+
+        mockMvc.perform(get("/review")
+                        .param("page", "999")
+                        .param("size", "5"))
+                .andExpect(status().isOk())
+
+                .andExpect(jsonPath("$._embedded.reviews").isArray())
+                .andExpect(jsonPath("$._embedded.reviews.length()").value(0));
+    }
+    @Test
+    void testGetReviewsDefaultPagination() throws Exception {
+
+        mockMvc.perform(get("/review"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.reviews").exists())
+                .andExpect(jsonPath("$.page").exists());
+    }
+
+
 
     private RoomType createRoomType(String name) {
         RoomType roomType = new RoomType();
