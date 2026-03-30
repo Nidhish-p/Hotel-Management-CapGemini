@@ -68,6 +68,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     Page<Hotel> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
+    boolean existsByName(String name);
+
+    boolean existsByNameAndHotelIdNot(String name, Integer hotelId);
+
     @Transactional(readOnly = true)
     default List<Amenity> getAmenityByHotelName(String name) {
         List<Hotel> hotels = findByName(name);
