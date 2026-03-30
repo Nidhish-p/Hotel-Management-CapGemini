@@ -17,10 +17,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.HotelManagement.repository.RoomRepository;
 import com.example.HotelManagement.repository.RoomTypeRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RoomTypeApiTest {
+@Transactional
+class RoomTypeApiTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,12 +33,7 @@ public class RoomTypeApiTest {
     @Autowired
     private RoomRepository roomRepo;
 
-    @BeforeEach
-    void cleanUp() {
-        roomRepo.deleteAll();
-        roomTypeRepository.deleteAll();
-        roomTypeRepository.flush();
-    }
+
 
     // TEST: GET ALL ROOM TYPES
     @Test
