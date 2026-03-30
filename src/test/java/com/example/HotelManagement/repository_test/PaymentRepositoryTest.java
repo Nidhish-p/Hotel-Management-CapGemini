@@ -74,6 +74,7 @@ public class PaymentRepositoryTest {
         hotel = new Hotel();
         hotel.setName("Grand Hotel");
         hotel.setLocation("Mumbai");
+        hotel.setDescription("TEST 1");
         entityManager.persist(hotel);
 
         // Create RoomType
@@ -266,6 +267,7 @@ public class PaymentRepositoryTest {
         // Create another hotel with its own room, reservation, payment
         Hotel hotel2 = new Hotel();
         hotel2.setName("Another Hotel");
+        hotel2.setDescription("TEST 2");
         hotel2.setLocation("Delhi");
         entityManager.persist(hotel2);
 

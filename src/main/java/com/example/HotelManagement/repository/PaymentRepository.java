@@ -12,7 +12,8 @@ import java.util.List;
 
 @RepositoryRestResource(
         collectionResourceRel = "payments",
-        path = "payments"
+        path = "payments",
+        excerptProjection = PaymentDetailsDTO.class
 )
 public interface PaymentRepository extends JpaRepository<Payment,Integer> {
 
