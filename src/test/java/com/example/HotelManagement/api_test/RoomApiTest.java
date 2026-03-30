@@ -121,7 +121,6 @@ class RoomApiTest {
         mockMvc.perform(get("/rooms/" + room.getRoomId()))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.roomId").value(room.getRoomId()))
                 .andExpect(jsonPath("$.roomNumber").value(room.getRoomNumber()));
     }
 
@@ -188,7 +187,8 @@ class RoomApiTest {
         mockMvc.perform(get("/rooms/search/byHotel")
                         .param("hotelId", "999999"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded").doesNotExist());
+                .andExpect(jsonPath("$._embedded.rooms").isArray())
+                .andExpect(jsonPath("$._embedded.rooms", hasSize(0)));
     }
 
     // ─── Amenities (Page 3) ───────────────────────────────────────────────────

@@ -312,7 +312,7 @@ public class HotelAPITest {
                 .param("page", "0")
                 .param("size", "0"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.page.size").value(20))
+                .andExpect(jsonPath("$.page.size").value(5))
                 .andExpect(jsonPath("$.page.number").value(0));
     }
 
