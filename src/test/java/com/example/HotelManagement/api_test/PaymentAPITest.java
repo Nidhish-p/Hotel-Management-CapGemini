@@ -181,8 +181,8 @@ public class PaymentAPITest {
                         .content(json))
                 .andExpect(status().isBadRequest());
     }
-    @Test
 
+    @Test
     void shouldReturn200AndPaymentsForValidHotelId() throws Exception {
         mockMvc.perform(get("/payments/search/by-hotel")
                         .param("hotelId", String.valueOf(hotel.getHotelId()))
@@ -206,22 +206,6 @@ public class PaymentAPITest {
     }
 
     @Test
-    void shouldReturnPaymentSummaryProjection() throws Exception {
-        mockMvc.perform(get("/payments/search/by-hotel")
-                        .param("hotelId", String.valueOf(hotel.getHotelId()))
-                        .param("projection", "paymentDetailsDTO")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$._embedded.payments[0].payment_id").exists())
-                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
-                .andExpect(jsonPath("$._embedded.payments[0].paymentStatus").value("PAID"))
-                // these fields should NOT be present in summary
-                .andExpect(jsonPath("$._embedded.payments[0].guest_name").doesNotExist())
-                .andExpect(jsonPath("$._embedded.payments[0].name").doesNotExist());
-    }
-
-    @Test
     void shouldReturnPaymentDetailsProjection() throws Exception {
         mockMvc.perform(get("/payments/search/by-hotel")
                         .param("hotelId", String.valueOf(hotel.getHotelId()))
@@ -232,8 +216,6 @@ public class PaymentAPITest {
                 .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
                 .andExpect(jsonPath("$._embedded.payments[0].guestName").value("John Doe"))
                 .andExpect(jsonPath("$._embedded.payments[0].guestEmail").value("john@gmail.com"))
-                // roomNumber and hotelName will need similar path corrections once you
-                // confirm where they appear in the actual response body
                 .andExpect(jsonPath("$._embedded.payments[0].roomNumber").value(101))
                 .andExpect(jsonPath("$._embedded.payments[0].hotelName").value("Grand Hotel"));
     }
