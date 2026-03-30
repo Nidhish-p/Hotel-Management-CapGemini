@@ -1,6 +1,7 @@
 package com.example.HotelManagement.entity;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +25,7 @@ public class Payment {
 
     @Positive(message = "amount must be positive")
     private Double amount;
-    private Date payment_date;
+    private LocalDate payment_date;
     private String payment_status;
 
     @ManyToOne
