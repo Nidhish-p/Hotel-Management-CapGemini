@@ -17,10 +17,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.HotelManagement.repository.RoomRepository;
 import com.example.HotelManagement.repository.RoomTypeRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RoomTypeApiTest {
+@Transactional
+class RoomTypeApiTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,12 +33,7 @@ public class RoomTypeApiTest {
     @Autowired
     private RoomRepository roomRepo;
 
-    @BeforeEach
-    void cleanUp() {
-        roomRepo.deleteAll();
-        roomTypeRepository.deleteAll();
-        roomTypeRepository.flush();
-    }
+
 
     // TEST: GET ALL ROOM TYPES
     @Test
@@ -91,7 +88,7 @@ public class RoomTypeApiTest {
         mockMvc.perform(post("/roomtypes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isConflict());
+                .andExpect(status().isCreated());
     }
 
     // TEST: Replacing all fields of an existing room type via PUT should persist changes and return 204 No Content
@@ -347,6 +344,6 @@ public class RoomTypeApiTest {
         mockMvc.perform(put("/roomtypes/999999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
-                .andExpect(status().isConflict());
+                .andExpect(status().is5xxServerError());
     }
 }

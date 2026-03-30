@@ -5,34 +5,42 @@ import com.example.HotelManagement.entity.Payment;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
-@Projection(name = "paymentDTO", types = Payment.class)
+import java.sql.Date;
+import java.time.LocalDate;
+@Projection(name = "paymentDetails", types = Payment.class)
 public interface PaymentDetailsDTO {
-    Integer getPaymentId();
-    Double getAmount();
-    String getPaymentStatus();
-    String getPaymentDate();
 
-    // Reservation details
+    @Value("#{target.payment_id}")
+    Integer getPaymentId();
+
+    @Value("#{target.amount}")
+    Double getAmount();
+
+    @Value("#{target.payment_status}")
+    String getPaymentStatus();
+
+    @Value("#{target.payment_date}")
+    LocalDate getPaymentDate();
+
+    // Keep these as they are
     @Value("#{target.reservation.guestName}")
     String getGuestName();
 
     @Value("#{target.reservation.guestEmail}")
     String getGuestEmail();
 
-    @Value("#{target.reservation.guestPhone}")
+    @Value("#{target.reservation.guest_phone}")
     String getGuestPhone();
 
     @Value("#{target.reservation.checkInDate}")
-    String getCheckInDate();
+    LocalDate getCheckInDate();
 
     @Value("#{target.reservation.checkOutDate}")
-    String getCheckOutDate();
+    LocalDate getCheckOutDate();
 
-    // Room details
     @Value("#{target.reservation.room.roomNumber}")
     Integer getRoomNumber();
 
-    // Hotel details
     @Value("#{target.reservation.room.hotel.name}")
     String getHotelName();
 
