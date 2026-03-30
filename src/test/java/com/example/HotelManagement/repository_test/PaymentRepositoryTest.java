@@ -105,7 +105,7 @@ public class PaymentRepositoryTest {
         payment = new Payment();
         payment.setAmount(299.99);
         payment.setPayment_status("PAID");
-        payment.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment.setPayment_date(LocalDate.now());
         payment.setReservation(reservation);
         entityManager.persist(payment);
 
@@ -143,7 +143,7 @@ public class PaymentRepositoryTest {
     @Test
     public void testSavePaymentWithInvalidReservationId(){
         Payment payment = new Payment();
-        payment.setPayment_date(Date.valueOf("2026-01-24"));
+        payment.setPayment_date(LocalDate.parse("2026-01-24"));
         payment.setAmount(9089.0);
         payment.setPayment_status("Paid");
 
@@ -161,7 +161,7 @@ public class PaymentRepositoryTest {
     void testSavePayment_WithNullAmount() {
         Payment payment = new Payment();
         payment.setAmount(null);                               // Amount is null — test nullable behavior
-        payment.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment.setPayment_date(LocalDate.now());
         payment.setPayment_status("PENDING");
         payment.setReservation(testReservation);
 
@@ -173,7 +173,7 @@ public class PaymentRepositoryTest {
     void testSavePayment_WithNullReservation() {
         Payment payment = new Payment();
         payment.setAmount(500.00);
-        payment.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment.setPayment_date(LocalDate.now());
         payment.setPayment_status("PENDING");
         payment.setReservation(null); // No reservation linked
 
@@ -199,7 +199,7 @@ public class PaymentRepositoryTest {
     void testPatchMultipleFields() throws Exception {
         Payment payment = new Payment();
         payment.setAmount(500.00);
-        payment.setPayment_date(Date.valueOf("2024-01-15"));
+        payment.setPayment_date(LocalDate.parse("2024-01-15"));
         payment.setPayment_status("PENDING");
         Payment saved = paymentRepository.save(payment);
 
@@ -250,7 +250,7 @@ public class PaymentRepositoryTest {
         Payment payment2 = new Payment();
         payment2.setAmount(150.00);
         payment2.setPayment_status("PENDING");
-        payment2.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment2.setPayment_date(LocalDate.now());
         payment2.setReservation(reservation);
         entityManager.persist(payment2);
         entityManager.flush();
@@ -287,7 +287,7 @@ public class PaymentRepositoryTest {
         Payment payment2 = new Payment();
         payment2.setAmount(500.00);
         payment2.setPayment_status("PAID");
-        payment2.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment2.setPayment_date(LocalDate.now());
         payment2.setReservation(reservation2);
         entityManager.persist(payment2);
         entityManager.flush();

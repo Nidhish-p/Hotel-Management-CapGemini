@@ -63,6 +63,7 @@ public class PaymentAPITest {
         hotel = new Hotel();
         hotel.setName("Grand Hotel");
         hotel.setLocation("Mumbai");
+        hotel.setDescription("TEST 1 ");
         entityManager.persist(hotel);
 
         // Create RoomType
@@ -94,7 +95,7 @@ public class PaymentAPITest {
         payment = new Payment();
         payment.setAmount(299.99);
         payment.setPayment_status("PAID");
-        payment.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment.setPayment_date(LocalDate.now());
         payment.setReservation(reservation);
         entityManager.persist(payment);
 
@@ -130,7 +131,7 @@ public class PaymentAPITest {
         Payment payment = new Payment();
         payment.setAmount(1800.00);
         payment.setPayment_status("SUCCESS");
-        payment.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment.setPayment_date(LocalDate.now());
         Payment saved = paymentRepository.save(payment);  // ✅ real ID generated here
 
         // Use the real DB-generated ID
@@ -220,27 +221,27 @@ public class PaymentAPITest {
                 .andExpect(jsonPath("$._embedded.payments[0].name").doesNotExist());
     }
 
-//    @Test
-//    void shouldReturnPaymentDetailsProjection() throws Exception {
-//        mockMvc.perform(get("/payments/search/by-hotel")
-//                        .param("hotelId", String.valueOf(hotel.getHotelId()))
-//                        .param("projection", "paymentDetailsDTO")
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
-//                .andExpect(jsonPath("$._embedded.payments[0].guest_name").value("John Doe"))
-//                .andExpect(jsonPath("$._embedded.payments[0].guest_email").value("john@gmail.com"))
-//                .andExpect(jsonPath("$._embedded.payments[0].room_number").value(101))
-//                .andExpect(jsonPath("$._embedded.payments[0].name").value("Grand Hotel"));
-//    }
+    @Test
+    void shouldReturnPaymentDetailsProjection() throws Exception {
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", String.valueOf(hotel.getHotelId()))
+                        .param("projection", "paymentDetailsDTO")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
+                .andExpect(jsonPath("$._embedded.payments[0].guestName").value("John Doe"))
+                .andExpect(jsonPath("$._embedded.payments[0].guestEmail").value("john@gmail.com"))
+                .andExpect(jsonPath("$._embedded.payments[0].roomNumber").value(101))
+                .andExpect(jsonPath("$._embedded.payments[0].hotelName").value("Grand Hotel"));
+    }
 
     @Test
     void shouldReturnMultiplePaymentsForSameHotel() throws Exception {
         Payment payment2 = new Payment();
         payment2.setAmount(150.00);
         payment2.setPayment_status("PENDING");
-        payment2.setPayment_date(Date.valueOf(LocalDate.now()));
+        payment2.setPayment_date(LocalDate.now());
         payment2.setReservation(reservation);
         entityManager.persist(payment2);
         entityManager.flush();
