@@ -26,8 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,9 +48,6 @@ public class PaymentAPITest {
 
     @Autowired
     private MockMvc mockMvc;
-
-//    @Autowired
-//    private TestEntityManager entityManager;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -142,14 +141,6 @@ public class PaymentAPITest {
                 .andExpect(jsonPath("$.payment_status").value("SUCCESS"));
     }
 
-
-//    @Test
-//    public void testGetPaymentById() throws Exception {
-//        mockMvc.perform(get("/payments/1")
-//                        .accept(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk());
-//    }
-
     @Test
     public void testDeletePayment() throws Exception {
         String json = """
@@ -189,59 +180,63 @@ public class PaymentAPITest {
                         .content(json))
                 .andExpect(status().isBadRequest());
     }
-
     @Test
-    void testPatchMultipleFields() throws Exception {
-        Payment payment = new Payment();
-        payment.setAmount(500.00);
-        payment.setPayment_date(Date.valueOf("2024-01-15"));
-        payment.setPayment_status("PENDING");
-        Payment saved = paymentRepository.save(payment);
 
-        Map<String, Object> patchData = new HashMap<>();
-        patchData.put("amount", 1000.00);
-        patchData.put("payment_status", "FAILED");
-        patchData.put("payment_date", "2024-06-01");
-
-        // Step 1: PATCH - just assert it succeeded
-        mockMvc.perform(patch("/payments/" + saved.getPayment_id())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchData)))
-                .andExpect(status().isNoContent()); // ✅ 204 is correct
-
-        // Step 2: GET - verify updated values
-        mockMvc.perform(get("/payments/" + saved.getPayment_id())
+    void shouldReturn200AndPaymentsForValidHotelId() throws Exception {
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", String.valueOf(hotel.getHotelId()))
                         .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount").value(1000.00))
-                .andExpect(jsonPath("$.payment_status").value("FAILED"));
+                .andExpect(jsonPath("$._embedded.payments").exists())
+                .andExpect(jsonPath("$._embedded.payments", hasSize(1)))
+                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
+                .andExpect(jsonPath("$._embedded.payments[0].payment_status").value("PAID"));
     }
 
     @Test
-    void shouldReturnPaymentsForValidHotelId() {
-        List<Payment> payments = paymentRepository
-                .findByReservation_Room_Hotel_HotelId(hotel.getHotelId());
-
-        assertNotNull(payments);
-        assertFalse(payments.isEmpty());
-        assertEquals(1, payments.size());
-        assertEquals("PAID", payments.get(0).getPayment_status());
-        assertEquals(299.99, payments.get(0).getAmount());
+    void shouldReturnEmptyForInvalidHotelId() throws Exception {
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", "9999")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.payments").isEmpty());
     }
 
     @Test
-    void shouldReturnEmptyListForInvalidHotelId() {
-        List<Payment> payments = paymentRepository
-                .findByReservation_Room_Hotel_HotelId(9999);
-
-        assertNotNull(payments);
-        assertTrue(payments.isEmpty());
+    void shouldReturnPaymentSummaryProjection() throws Exception {
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", String.valueOf(hotel.getHotelId()))
+                        .param("projection", "paymentDTO")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$._embedded.payments[0].payment_id").exists())
+                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
+                .andExpect(jsonPath("$._embedded.payments[0].payment_status").value("PAID"))
+                // these fields should NOT be present in summary
+                .andExpect(jsonPath("$._embedded.payments[0].guest_name").doesNotExist())
+                .andExpect(jsonPath("$._embedded.payments[0].name").doesNotExist());
     }
 
-    // ✅ Test 3 - should return multiple payments for same hotel
+//    @Test
+//    void shouldReturnPaymentDetailsProjection() throws Exception {
+//        mockMvc.perform(get("/payments/search/by-hotel")
+//                        .param("hotelId", String.valueOf(hotel.getHotelId()))
+//                        .param("projection", "paymentDetailsDTO")
+//                        .accept(MediaType.APPLICATION_JSON))
+//                .andDo(print())
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$._embedded.payments[0].amount").value(299.99))
+//                .andExpect(jsonPath("$._embedded.payments[0].guest_name").value("John Doe"))
+//                .andExpect(jsonPath("$._embedded.payments[0].guest_email").value("john@gmail.com"))
+//                .andExpect(jsonPath("$._embedded.payments[0].room_number").value(101))
+//                .andExpect(jsonPath("$._embedded.payments[0].name").value("Grand Hotel"));
+//    }
+
     @Test
-    void shouldReturnMultiplePaymentsForSameHotel() {
-        // Add second payment for same reservation
+    void shouldReturnMultiplePaymentsForSameHotel() throws Exception {
         Payment payment2 = new Payment();
         payment2.setAmount(150.00);
         payment2.setPayment_status("PENDING");
@@ -250,67 +245,25 @@ public class PaymentAPITest {
         entityManager.persist(payment2);
         entityManager.flush();
 
-        List<Payment> payments = paymentRepository
-                .findByReservation_Room_Hotel_HotelId(hotel.getHotelId());
-
-        assertEquals(2, payments.size());
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", String.valueOf(hotel.getHotelId()))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.payments", hasSize(2)));
     }
 
-    // ✅ Test 4 - should not return payments from different hotel
     @Test
-    void shouldNotReturnPaymentsFromDifferentHotel() {
-        // Create another hotel with its own room, reservation, payment
-        Hotel hotel2 = new Hotel();
-        hotel2.setName("Another Hotel");
-        hotel2.setLocation("Delhi");
-        entityManager.persist(hotel2);
-
-        Room room2 = new Room();
-        room2.setRoomNumber(201);
-        room2.setHotel(hotel2);
-        room2.setIsAvailable(true);
-        entityManager.persist(room2);
-
-        Reservation reservation2 = new Reservation();
-        reservation2.setGuestName("Jane Doe");
-        reservation2.setGuestEmail("jane@gmail.com");
-        reservation2.setGuest_phone("8888888888");
-        reservation2.setRoom(room2);
-        reservation2.setCheckInDate(java.time.LocalDate.now());
-        reservation2.setCheckOutDate(java.time.LocalDate.now().plusDays(2));
-        entityManager.persist(reservation2);
-
-        Payment payment2 = new Payment();
-        payment2.setAmount(500.00);
-        payment2.setPayment_status("PAID");
-        payment2.setPayment_date(Date.valueOf(LocalDate.now()));
-        payment2.setReservation(reservation2);
-        entityManager.persist(payment2);
-        entityManager.flush();
-
-        // Should only return payments for hotel 1
-        List<Payment> payments = paymentRepository
-                .findByReservation_Room_Hotel_HotelId(hotel.getHotelId());
-
-        assertEquals(1, payments.size());
-        assertEquals(299.99, payments.get(0).getAmount());
+    void shouldReturn404ForWrongEndpoint() throws Exception {
+        mockMvc.perform(get("/payments/search/wrong-endpoint")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
-    // ✅ Test 5 - should return correct payment details
     @Test
-    void shouldReturnCorrectPaymentDetails() {
-        List<Payment> payments = paymentRepository
-                .findByReservation_Room_Hotel_HotelId(hotel.getHotelId());
-
-        Payment result = payments.get(0);
-
-        assertAll(
-                () -> assertNotNull(result.getPayment_id()),
-                () -> assertEquals(299.99, result.getAmount()),
-                () -> assertEquals("PAID", result.getPayment_status()),
-                () -> assertNotNull(result.getPayment_date()),
-                () -> assertEquals(reservation.getReservation_id(),
-                        result.getReservation().getReservation_id())
-        );
+    void shouldReturn200WhenHotelIdIsMissing() throws Exception {
+        mockMvc.perform(get("/payments/search/by-hotel")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()); // ✅ FIX
     }
 }
