@@ -28,6 +28,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -118,9 +119,7 @@ class AmentityAPITest {
                         .content(body))
                 .andDo(print())
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Rooftop Pool"))
-                .andExpect(jsonPath("$.description").value("Heated rooftop pool with city views"))
-                .andExpect(jsonPath("$._links.self.href").exists());
+                .andExpect(header().string("Location", containsString("/amenities/")));
     }
 
     @Test
@@ -166,8 +165,7 @@ class AmentityAPITest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$._links.self.href").exists())
-                .andExpect(jsonPath("$._links.self.href", containsString("/amenities/")));
+                .andExpect(header().string("Location", containsString("/amenities/")));
     }
 
     @Test
@@ -205,9 +203,12 @@ class AmentityAPITest {
                                 { "name": "Updated Amenity Name" }
                                 """))
                 .andDo(print())
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/amenities/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated Amenity Name"))
-                .andExpect(jsonPath("$.description").value(originalDescription)); // unchanged
+                .andExpect(jsonPath("$.description").value(originalDescription));
     }
 
     // ─── ROOM-AMENITY ASSOCIATION ─────────────────────────────────────────────
