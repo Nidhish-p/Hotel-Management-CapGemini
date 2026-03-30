@@ -26,7 +26,7 @@ import java.util.List;
 
 @SpringBootTest
 @Transactional
-class AmenityRepositoryTest {
+class  AmenityRepositoryTest {
 
     @Autowired private AmenityRepository  amenityRepository;
     @Autowired private RoomRepository roomRepository;
