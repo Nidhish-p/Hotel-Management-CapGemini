@@ -298,4 +298,55 @@ public class RoomTypeApiTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
+
+    // TEST: Fetching an existing room type by ID should return 200 OK
+    @Test
+    void testGetRoomTypeById_Exists_Returns200() throws Exception {
+        String createJson = """
+                {
+                    "typeName": "Standard",
+                    "description": "Standard room",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 3000.00
+                }
+                """;
+
+        String location = mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader("Location");
+
+        mockMvc.perform(get(location)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    // TEST: Fetching a non-existent room type by ID should return 404 Not Found
+    @Test
+    void testGetRoomTypeById_NotFound_Returns404() throws Exception {
+        mockMvc.perform(get("/roomtypes/999999")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    // TEST: PUT to a non-existent room type ID should return 409 Conflict
+    @Test
+    void testUpdateRoomType_NonExistent_Returns409() throws Exception {
+        String updateJson = """
+                {
+                    "typeName": "Ghost Room",
+                    "description": "Does not exist",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 1000.00
+                }
+                """;
+
+        mockMvc.perform(put("/roomtypes/999999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateJson))
+                .andExpect(status().isConflict());
+    }
 }
