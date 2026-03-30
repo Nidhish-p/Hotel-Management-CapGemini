@@ -8,7 +8,7 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 import java.util.List;
 
-@RepositoryRestResource(path="review")
+@RepositoryRestResource(path="review", excerptProjection = ReviewDto.class)
 public interface ReviewRepository extends JpaRepository<Review,Integer> {
    // @RestResource(path = "byHotel", rel = "byHotel")
     List<Review> findDistinctByReservationRoomHotelHotelId(Integer hotelId);
