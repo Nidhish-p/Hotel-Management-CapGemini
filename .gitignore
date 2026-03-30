@@ -34,7 +34,7 @@ resources/
 pom.xml
 src/main/resources/data.sql
 src/main/resources/application.properties
-src/test/resources/application.properties
-*.properties
+
+
 /src/test/java/resources/
-/src/test/resources/
+
