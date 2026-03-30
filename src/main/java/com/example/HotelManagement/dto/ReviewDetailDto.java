@@ -7,21 +7,30 @@ import lombok.Setter;
 import org.springframework.data.rest.core.config.Projection;
 
 import java.time.LocalDate;
-@Data
-@Getter
-@Setter
-public class ReviewDetailDto {
-    private Integer reviewId;
-    private String comment;
-    private int rating;
-    private LocalDate reviewDate;
+@Projection(name = "reviewDetails", types = { Review.class })
+public interface ReviewDetailDto {
+/*
+        String getComment();
+        int getRating();
+        LocalDate getReview_date();
+        String getReservation_Guest_name();
+        LocalDate getReservation_Check_in_date();
+        LocalDate getReservation_Check_out_date();
+        Integer getReservation_Reservation_id();
+*/
+    // Review
+    String getComment();
+    int getRating();
+    LocalDate getReview_date();
 
-    private String guestName;
-    private LocalDate checkInDate;
-    private LocalDate checkOutDate;
+    // Reservation (✅ FIXED)
+    String getReservation_GuestName();
+    LocalDate getReservation_CheckInDate();
+    LocalDate getReservation_CheckOutDate();
+    Integer getReservation_Reservation_id();
+    }
 
-    private Integer roomNumber;
-    private String roomType;
 
-}
+
+
 
