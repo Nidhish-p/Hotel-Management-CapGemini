@@ -6,7 +6,7 @@ import org.springframework.data.rest.core.config.Projection;
 
 import java.sql.Date;
 
-@Projection(name = "hotelDTO", types = Payment.class)
+@Projection(name = "paymentDTO", types = Payment.class)
 public interface PaymentDTO {
 
     Double getAmount();
