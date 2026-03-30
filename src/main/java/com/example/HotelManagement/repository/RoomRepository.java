@@ -10,5 +10,5 @@ import org.springframework.data.rest.core.annotation.RestResource;
 import java.util.List;
 
 @RepositoryRestResource(excerptProjection = RoomSummary.class)
-public interface RoomRepo extends JpaRepository<Room, Integer> {
+public interface RoomRepository extends JpaRepository<Room, Integer> {
 }

@@ -1,12 +1,9 @@
 package com.example.HotelManagement.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -15,11 +12,15 @@ public class Amenity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int amenity_id;
+    @Column(name="amenityId")
+    int amenityId;
     String name;
     String description;
 
     @ManyToMany(mappedBy = "amenities")
     private List<Hotel> hotels;
+
+    @ManyToMany(mappedBy = "amenities",fetch = FetchType.LAZY)
+    private List<Room> rooms = new ArrayList<>();
     
 }
