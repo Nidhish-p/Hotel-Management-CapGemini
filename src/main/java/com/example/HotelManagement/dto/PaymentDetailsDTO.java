@@ -8,7 +8,7 @@ import org.springframework.data.rest.core.config.Projection;
 import java.sql.Date;
 import java.time.LocalDate;
 @Projection(name = "paymentDetails", types = Payment.class)
-public interface PaymentDetailsDTO {
+public interface  PaymentDetailsDTO {
 
     @Value("#{target.payment_id}")
     Integer getPaymentId();
