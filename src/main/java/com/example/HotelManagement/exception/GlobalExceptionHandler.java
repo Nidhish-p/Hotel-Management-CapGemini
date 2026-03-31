@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        return new ResponseEntity<>("Invalid request: data constraint violation", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Conflict: data constraint violation", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(EmptyResultDataAccessException.class)
@@ -80,6 +80,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleUnexpected(Exception ex) {
         return new ResponseEntity<>("Unexpected server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(RoomTypeLinkedException.class)
+    public ResponseEntity<String> handleRoomTypeLinkedException(RoomTypeLinkedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 }
 

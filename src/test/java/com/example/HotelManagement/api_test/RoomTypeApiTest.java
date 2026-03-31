@@ -1,6 +1,5 @@
 package com.example.HotelManagement.api_test;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,10 +13,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.HotelManagement.repository.RoomRepository;
 import com.example.HotelManagement.repository.RoomTypeRepository;
-import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -329,9 +328,9 @@ class RoomTypeApiTest {
                 .andExpect(status().isNotFound());
     }
 
-    // TEST: PUT to a non-existent room type ID should return 409 Conflict
+    // TEST: PUT to a non-existent room type ID should return 500 (Spring Data REST upsert conflict behavior)
     @Test
-    void testUpdateRoomType_NonExistent_Returns409() throws Exception {
+    void testUpdateRoomType_NonExistent_Returns500() throws Exception {
         String updateJson = """
                 {
                     "typeName": "Ghost Room",
@@ -344,6 +343,261 @@ class RoomTypeApiTest {
         mockMvc.perform(put("/roomtypes/999999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateJson))
-                .andExpect(status().is5xxServerError());
+                .andExpect(status().isInternalServerError());
     }
+
+    // TEST: GET /roomtypes/search/findByTypeNameStartingWith with match should return 200 and results
+    @Test
+    void testSearchByTypeName_MatchFound_Returns200() throws Exception {
+        String json = """
+                {
+                    "typeName": "Deluxe Suite",
+                    "description": "Luxury room",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 5000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/roomtypes/search/findByTypeNameStartingWith")
+                        .param("typeName", "D")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isArray())
+                .andExpect(jsonPath("$._embedded.roomTypes[0].typeName").value("Deluxe Suite"));
+    }
+
+    // TEST: GET /roomtypes/search/findByTypeNameStartingWith with no match should return 200 and empty
+    @Test
+    void testSearchByTypeName_NoMatch_Returns200Empty() throws Exception {
+        mockMvc.perform(get("/roomtypes/search/findByTypeNameStartingWith")
+                        .param("typeName", "xyz")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isArray())
+                .andExpect(jsonPath("$._embedded.roomTypes").isEmpty());
+    }
+
+    // TEST: GET /roomtypes/search/findByDescriptionStartingWith with match should return 200 and results
+    @Test
+    void testSearchByDescription_MatchFound_Returns200() throws Exception {
+        String json = """
+                {
+                    "typeName": "Lake View",
+                    "description": "Lovely lake view room",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 4000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/roomtypes/search/findByDescriptionStartingWith")
+                        .param("description", "L")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isArray());
+    }
+
+    // TEST: GET /roomtypes/search/findByPricePerNight with match should return 200 and results
+    @Test
+    void testSearchByPrice_MatchFound_Returns200() throws Exception {
+        String json = """
+                {
+                    "typeName": "Economy Room",
+                    "description": "Basic room",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 5000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/roomtypes/search/findByPricePerNight")
+                        .param("pricePerNight", "5000.00")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isArray());
+    }
+
+    // TEST: GET /roomtypes/search/findByMaxOccupancy with match should return 200 and results
+    @Test
+    void testSearchByMaxOccupancy_MatchFound_Returns200() throws Exception {
+        String json = """
+                {
+                    "typeName": "Family Room",
+                    "description": "Room for families",
+                    "maxOccupancy": 4,
+                    "pricePerNight": 6000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/roomtypes/search/findByMaxOccupancy")
+                        .param("maxOccupancy", "4")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isArray());
+    }
+
+    @Test
+    void testAddRoomType_NullTypeName_Returns400() throws Exception {
+        String json = """
+                {
+                    "typeName": null,
+                    "description": "Invalid",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 3000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testAddRoomType_EmptyTypeName_Returns400() throws Exception {
+        String json = """
+                {
+                    "typeName": "",
+                    "description": "Invalid",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 3000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testAddRoomType_NegativePrice_Returns400() throws Exception {
+        String json = """
+                {
+                    "typeName": "Invalid Price",
+                    "description": "Test",
+                    "maxOccupancy": 2,
+                    "pricePerNight": -1000.00
+                }
+                """;
+
+        mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testGetRoomTypes_WithPagination_ReturnsLimitedResults() throws Exception {
+
+        for (int i = 1; i <= 5; i++) {
+            String json = String.format("""
+                    {
+                        "typeName": "Type%d",
+                        "description": "Test",
+                        "maxOccupancy": 2,
+                        "pricePerNight": 1000.00
+                    }
+                    """, i);
+
+            mockMvc.perform(post("/roomtypes")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(json));
+        }
+
+        mockMvc.perform(get("/roomtypes?page=0&size=2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes.length()").value(2));
+    }
+
+    @Test
+    void testGetRoomTypes_PageOutOfRange_ReturnsEmpty() throws Exception {
+
+        mockMvc.perform(get("/roomtypes?page=999&size=2")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isEmpty());
+    }
+
+    @Test
+    void testPatchRoomType_VerifyOnlyPriceUpdated() throws Exception {
+
+        String createJson = """
+                {
+                    "typeName": "Patch Test",
+                    "description": "Original",
+                    "maxOccupancy": 2,
+                    "pricePerNight": 4000.00
+                }
+                """;
+
+        String location = mockMvc.perform(post("/roomtypes")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createJson))
+                .andReturn()
+                .getResponse()
+                .getHeader("Location");
+
+        String patchJson = """
+                {
+                    "pricePerNight": 7000.00
+                }
+                """;
+
+        mockMvc.perform(patch(location)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(patchJson))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pricePerNight").value(7000.00))
+                .andExpect(jsonPath("$.typeName").value("Patch Test"))
+                .andExpect(jsonPath("$.description").value("Original"));
+    }
+
+    @Test
+    void testGetAllRoomTypes_EmptyDatabase_ReturnsEmptyList() throws Exception {
+
+        mockMvc.perform(get("/roomtypes")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.roomTypes").isEmpty());
+    }
+
+    @Test
+    void testDeleteRoomType_NotFound_Returns404() throws Exception {
+
+        mockMvc.perform(delete("/roomtypes/999999"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateRoomType_InvalidBody_Returns400() throws Exception {
+
+        mockMvc.perform(put("/roomtypes/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
 }
