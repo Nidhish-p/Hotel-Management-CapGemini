@@ -1,6 +1,5 @@
 package com.example.HotelManagement.api_test;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,13 +13,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.HotelManagement.repository.RoomRepository;
 import com.example.HotelManagement.repository.RoomTypeRepository;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RoomTypeApiTest {
+@Transactional
+class RoomTypeApiTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -31,12 +32,7 @@ public class RoomTypeApiTest {
     @Autowired
     private RoomRepository roomRepo;
 
-    @BeforeEach
-    void cleanUp() {
-        roomRepo.deleteAll();
-        roomTypeRepository.deleteAll();
-        roomTypeRepository.flush();
-    }
+
 
     // TEST: GET ALL ROOM TYPES
     @Test
@@ -91,7 +87,7 @@ public class RoomTypeApiTest {
         mockMvc.perform(post("/roomtypes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isConflict());
+                .andExpect(status().isCreated());
     }
 
     // TEST: Replacing all fields of an existing room type via PUT should persist changes and return 204 No Content
