@@ -18,8 +18,10 @@ import com.example.HotelManagement.entity.RoomType;
 public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
 
     List<RoomType> findByTypeNameStartingWith(String typeName);
+    List<RoomType> findByTypeNameContainingIgnoreCaseOrderByRoomTypeIdDesc(String typeName);
     List<RoomType> findByDescriptionStartingWith(String description);
     List<RoomType> findByPricePerNight(BigDecimal pricePerNight);
     List<RoomType> findByMaxOccupancy(Integer maxOccupancy);
     List<Room> findByRoomTypeId(Long id);
+    boolean existsByTypeName(String typeName);
 }
