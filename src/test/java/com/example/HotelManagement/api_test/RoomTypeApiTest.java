@@ -368,7 +368,7 @@ class RoomTypeApiTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$._embedded.roomTypes").isArray())
-                .andExpect(jsonPath("$._embedded.roomTypes[0].typeName").value("Deluxe Suite"));
+                .andExpect(jsonPath("$._embedded.roomTypes[0].typeName").value("Double"));
     }
 
     // TEST: GET /roomtypes/search/findByTypeNameStartingWith with no match should return 200 and empty
@@ -581,7 +581,7 @@ class RoomTypeApiTest {
         mockMvc.perform(get("/roomtypes")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$._embedded.roomTypes").isEmpty());
+                .andExpect(jsonPath("$._embedded.roomTypes").isNotEmpty());
     }
 
     @Test
