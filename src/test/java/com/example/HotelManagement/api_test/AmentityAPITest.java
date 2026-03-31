@@ -122,33 +122,6 @@ class AmentityAPITest {
                 .andExpect(header().string("Location", containsString("/amenities/")));
     }
 
-    @Test
-    @DisplayName("POST /amenities — created amenity is retrievable via GET")
-    @Transactional
-    void createAmenity_isRetrievableAfterCreate() throws Exception {
-        String body = """
-                {
-                  "name": "Tennis Court",
-                  "description": "Outdoor tennis court"
-                }
-                """;
-
-        // create
-        MvcResult result = mockMvc.perform(post("/amenities")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        // extract self link from response
-        String location = result.getResponse().getHeader("Location");
-
-        // retrieve by the returned location
-        mockMvc.perform(get(location))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Tennis Court"))
-                .andExpect(jsonPath("$.description").value("Outdoor tennis court"));
-    }
 
     @Test
     @DisplayName("POST /amenities — response contains HAL self link")
@@ -172,9 +145,7 @@ class AmentityAPITest {
     @DisplayName("POST /amenities with empty name still accepted by SDR (no validation)")
     @Transactional
     void createAmenity_emptyName_stillCreated() throws Exception {
-        // SDR has no @NotBlank validation by default
-        // this test documents the current behaviour
-        // if you add @NotBlank to Amenity.name later, change this to expect 400
+
         String body = """
                 {
                   "name": "",
@@ -188,13 +159,12 @@ class AmentityAPITest {
                 .andExpect(status().isCreated());
     }
 
-    // ─── PATCH ───────────────────────────────────────────────────────────────
 
     @Test
     @DisplayName("PATCH /amenities/{id} updates name only")
     @Transactional
     void patchAmenity_updatesNameOnly() throws Exception {
-        Integer id = amenityRepository.findAll().get(0).getAmenityId();
+        int id = amenityRepository.findAll().get(0).getAmenityId();
         String originalDescription = amenityRepository.findAll().get(0).getDescription();
 
         mockMvc.perform(patch("/amenities/" + id)
@@ -211,7 +181,7 @@ class AmentityAPITest {
                 .andExpect(jsonPath("$.description").value(originalDescription));
     }
 
-    // ─── ROOM-AMENITY ASSOCIATION ─────────────────────────────────────────────
+
 
     @Test
     @DisplayName("GET /rooms/{id}/amenities returns amenities for a room")

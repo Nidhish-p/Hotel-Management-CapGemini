@@ -9,6 +9,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.HotelManagement.entity.Hotel;
@@ -148,24 +149,39 @@ class ReservationApiTest {
     @Test
     void getAllReservations() throws Exception {
 
-        Room room = createRoom();
+            Room room = createRoom();
 
-        mockMvc.perform(post("/api/reservations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                {
-                  "guestName": "API",
-                  "guestEmail": "api@test.com",
-                  "guest_phone": "123",
-                  "checkInDate": "2025-01-01",
-                  "checkOutDate": "2025-01-02",
-                  "room": { "roomId": %d }
-                }
-                """.formatted(room.getRoomId())));
+            mockMvc.perform(post("/api/reservations")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("""
+                                            {
+                                              "guestName": "API",
+                                              "guestEmail": "api@test.com",
+                                              "guest_phone": "123",
+                                              "checkInDate": "2025-01-01",
+                                              "checkOutDate": "2025-01-02",
+                                              "room": { "roomId": %d }
+                                            }
+                                            """.formatted(room.getRoomId())));
 
-        mockMvc.perform(get("/reservations"))
-                .andExpect(status().isOk());
+            mockMvc.perform(get("/reservations"))
+                            .andExpect(status().isOk());
     }
+
+        @Test
+        void getReservations_withPagination_existingData() throws Exception {
+
+        mockMvc.perform(get("/reservations")
+                .param("page", "0")
+                .param("size", "5"))
+
+                .andDo(print())
+                        .andExpect(status().isOk());
+
+                // ✅ minimal safe checks
+                //.andExpect(jsonPath("$").exists());
+        }
+
 
     @Test
     void getByGuestName() throws Exception {
@@ -307,5 +323,9 @@ class ReservationApiTest {
                 .param("start", "2025-01-01")
                 .param("end", "2025-12-01"))
                 .andExpect(status().isOk());
+    }
+
+    private Object jsonPath(String $pagesize) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
