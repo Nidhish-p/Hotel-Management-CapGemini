@@ -1,17 +1,15 @@
 package com.example.HotelManagement.api_test;
 
 
-import com.example.HotelManagement.entity.Amenity;
+
 import com.example.HotelManagement.entity.Hotel;
 import com.example.HotelManagement.entity.Room;
-import com.example.HotelManagement.entity.RoomType;
-import com.example.HotelManagement.repository.AmenityRepository;
+
 import com.example.HotelManagement.repository.HotelRepository;
 import com.example.HotelManagement.repository.RoomRepository;
-import com.example.HotelManagement.repository.RoomTypeRepository;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-import java.math.BigDecimal;
-import java.util.List;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,7 +35,7 @@ class RoomApiTest {
     @Autowired private RoomRepository    roomRepository;
     @Autowired private HotelRepository   hotelRepository;
 
-    // ─── helpers ──────────────────────────────────────────────────────────────
+
 
     private Hotel firstHotel() {
         return hotelRepository.findAll().get(0);
@@ -52,7 +49,7 @@ class RoomApiTest {
         return roomRepository.findByHotel_HotelId(hotelId).get(0);
     }
 
-    // ─── Hotel (Page 1) ───────────────────────────────────────────────────────
+
 
     @Test
     @DisplayName("GET /hotels returns 200 and at least one hotel")
@@ -84,7 +81,7 @@ class RoomApiTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ─── Rooms (Page 2) ───────────────────────────────────────────────────────
+
 
     @Test
     @DisplayName("GET /rooms returns 200 and at least one room")
@@ -150,7 +147,7 @@ class RoomApiTest {
     void byHotel_allRoomsBelongToHotel() throws Exception {
         Hotel hotel = firstHotel();
 
-        // verify via repository that search results match
+
         var rooms = roomRepository.findByHotel_HotelId(hotel.getHotelId());
         rooms.forEach(r ->
                 org.assertj.core.api.Assertions

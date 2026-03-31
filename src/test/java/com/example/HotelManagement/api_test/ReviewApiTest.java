@@ -63,8 +63,15 @@ public class ReviewApiTest {
         hotel = hotelRepository.save(hotel);
 
         // RoomType
+//        RoomType roomType = new RoomType();
+//        roomType.setTypeName("Deluxe");
+//        roomType = roomTypeRepository.save(roomType);
+
         RoomType roomType = new RoomType();
         roomType.setTypeName("Deluxe");
+        roomType.setDescription("Deluxe room");
+        roomType.setMaxOccupancy(2);
+        roomType.setPricePerNight(BigDecimal.valueOf(2000));
         roomType = roomTypeRepository.save(roomType);
 
         // Room
