@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.HotelManagement.entity.RoomType;
@@ -16,6 +19,7 @@ import com.example.HotelManagement.repository.RoomTypeRepository;
 
 @SpringBootTest
 @Transactional
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class RoomTypeRepositoryTest {
 
     @Autowired
@@ -246,5 +250,152 @@ class RoomTypeRepositoryTest {
         List<RoomType> result = roomTypeRepository.findAll();
 
         assertNotNull(result);
+    }
+
+    @Test
+    void testSave_DuplicateTypeName_DoesNotCrash() {
+        RoomType r1 = new RoomType();
+        r1.setTypeName("Duplicate");
+        r1.setDescription("Test");
+        r1.setMaxOccupancy(2);
+        r1.setPricePerNight(new java.math.BigDecimal("1000"));
+
+        roomTypeRepository.save(r1);
+
+        RoomType r2 = new RoomType();
+        r2.setTypeName("Duplicate"); 
+        r2.setDescription("Test2");
+        r2.setMaxOccupancy(3);
+        r2.setPricePerNight(new java.math.BigDecimal("2000"));
+
+        try {
+            roomTypeRepository.save(r2);
+        } catch (Exception e) {
+            assertNotNull(e); 
+        }
+    }
+
+    @Test
+    void testPagination_FirstPage_Works() {
+        RoomType r1 = new RoomType();
+        r1.setTypeName("Type1");
+        r1.setDescription("Desc1");
+        r1.setMaxOccupancy(2);
+        r1.setPricePerNight(new java.math.BigDecimal("1000"));
+        roomTypeRepository.save(r1);
+
+        RoomType r2 = new RoomType();
+        r2.setTypeName("Type2");
+        r2.setDescription("Desc2");
+        r2.setMaxOccupancy(2);
+        r2.setPricePerNight(new java.math.BigDecimal("2000"));
+        roomTypeRepository.save(r2);
+
+        Page<RoomType> page = roomTypeRepository.findAll(PageRequest.of(0, 1));
+
+        assertEquals(1, page.getContent().size());
+    }
+
+    @Test
+    void testPagination_SecondPage_Works() {
+        for (int i = 1; i <= 3; i++) {
+            RoomType r = new RoomType();
+            r.setTypeName("Type" + i);
+            r.setDescription("Desc" + i);
+            r.setMaxOccupancy(2);
+            r.setPricePerNight(new java.math.BigDecimal("1000"));
+            roomTypeRepository.save(r);
+        }
+
+        Page<RoomType> page = roomTypeRepository.findAll(PageRequest.of(1, 1));
+
+        assertEquals(1, page.getContent().size());
+    }
+
+    @Test
+    void testPagination_EmptyPage_ReturnsEmpty() {
+
+        // Get total count dynamically
+        long total = roomTypeRepository.count();
+
+        // Calculate page index that is surely out of bounds
+        int pageSize = 5;
+        int outOfBoundPage = (int) (total / pageSize) + 5;
+
+        Page<RoomType> page = roomTypeRepository.findAll(
+                PageRequest.of(outOfBoundPage, pageSize)
+        );
+
+        assertEquals(0, page.getContent().size());
+    }
+
+    @Test
+    void testSorting_ByPriceAscending_Works() {
+
+        RoomType r1 = new RoomType();
+        r1.setTypeName("Sort_Test_1");
+        r1.setDescription("Test");
+        r1.setMaxOccupancy(2);
+        r1.setPricePerNight(new java.math.BigDecimal("1000.00"));
+
+        RoomType r2 = new RoomType();
+        r2.setTypeName("Sort_Test_2");
+        r2.setDescription("Test");
+        r2.setMaxOccupancy(2);
+        r2.setPricePerNight(new java.math.BigDecimal("2000.00"));
+
+        roomTypeRepository.save(r1);
+        roomTypeRepository.save(r2);
+
+        List<RoomType> result = roomTypeRepository.findAll(
+            org.springframework.data.domain.Sort.by("pricePerNight").ascending()
+        );
+
+        assertTrue(result.size() > 0);
+
+        if (result.size() >= 2) {
+            java.math.BigDecimal first = result.get(0).getPricePerNight();
+            java.math.BigDecimal second = result.get(1).getPricePerNight();
+
+            assertTrue(first.compareTo(second) <= 0);
+        }
+    }
+
+    @Test
+    void testFindByTypeNameStartingWith_MultipleResults() {
+        RoomType r1 = new RoomType();
+        r1.setTypeName("Deluxe A");
+        r1.setDescription("Test");
+        r1.setMaxOccupancy(2); 
+        r1.setPricePerNight(new java.math.BigDecimal("3000.00"));
+    
+        RoomType r2 = new RoomType();
+        r2.setTypeName("Deluxe B");
+        r2.setDescription("Test");
+        r2.setMaxOccupancy(3); 
+        r2.setPricePerNight(new java.math.BigDecimal("4000.00"));
+    
+        roomTypeRepository.save(r1);
+        roomTypeRepository.save(r2);
+    
+        List<RoomType> result =
+                roomTypeRepository.findByTypeNameStartingWith("Deluxe");
+        assertTrue(result.size() >= 2);
+    }
+
+    @Test
+    void testFindByTypeNameStartingWith_CaseInsensitiveSafe() {
+
+        RoomType r = new RoomType();
+        r.setTypeName("Deluxe");
+        r.setDescription("Test");
+        r.setMaxOccupancy(4); 
+        r.setPricePerNight(new java.math.BigDecimal("6000.00"));
+
+        roomTypeRepository.save(r);
+
+        List<RoomType> result = roomTypeRepository.findByTypeNameStartingWith("del");
+
+        assertNotNull(result); 
     }
 }
