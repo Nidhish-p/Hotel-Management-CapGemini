@@ -1,6 +1,7 @@
 package com.example.HotelManagement.repository_test;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -133,9 +134,9 @@ class ReservationRepositoryTest {
         Payment payment = new Payment();
         payment.setAmount(500.0);
         payment.setPayment_status("PAID");
-        payment.setPayment_date(new java.sql.Date(System.currentTimeMillis()));
+        payment.setPayment_date(LocalDate.now());
         payment.setReservation(r);
-        
+
 
         paymentRepository.save(payment);
         List<Payment> p = r.getPayments();
@@ -216,7 +217,7 @@ void deleteReservationShouldAlsoDeletePayments() {
     Payment payment = new Payment();
     payment.setAmount(1000.0);
     payment.setPayment_status("PAID");
-    payment.setPayment_date(new java.sql.Date(System.currentTimeMillis()));
+    payment.setPayment_date(LocalDate.now());
 
     payment.setReservation(r);
     List<Payment> p = r.getPayments();
