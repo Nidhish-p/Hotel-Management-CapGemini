@@ -1,6 +1,7 @@
 package com.example.HotelManagement.entity;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,8 +23,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer payment_id;
 
+    @Positive(message = "amount must be positive")
     private Double amount;
-    private Date payment_date;
+    private LocalDate payment_date;
     private String payment_status;
 
     @ManyToOne

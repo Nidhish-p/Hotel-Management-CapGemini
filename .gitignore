@@ -29,10 +29,12 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-resources/
+
 .vscode/
 pom.xml
 src/main/resources/data.sql
-src/main/resources/application.properties
-src/test/resources/application.properties
-*.properties
+#src/main/resources/application.properties
+
+
+
+

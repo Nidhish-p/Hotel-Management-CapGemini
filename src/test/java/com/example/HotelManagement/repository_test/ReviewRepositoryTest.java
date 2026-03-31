@@ -1,4 +1,5 @@
 package com.example.HotelManagement.repository_test;
+import com.example.HotelManagement.dto.ReviewDto;
 import com.example.HotelManagement.entity.Review;
 import com.example.HotelManagement.entity.Hotel;
 import com.example.HotelManagement.entity.Room;
@@ -13,6 +14,9 @@ import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -183,24 +187,27 @@ public class ReviewRepositoryTest {
     }
     @Test
     void findReviewsByHotelId_shouldContainInsertedReview() {
+
         Hotel hotel = new Hotel();
         hotel.setName("Test Hotel");
         hotel.setLocation("City");
         hotel.setDescription("Desc");
         hotel = hotelRepository.save(hotel);
 
-        Integer hotelId = hotel.getHotelId(); // 🔥 IMPORTANT
+        Integer hotelId = hotel.getHotelId();
 
-        // 2️⃣ Room
+        // RoomType
+        RoomType roomType = createRoomType("Suite");
+
+        // Room
         Room room = new Room();
         room.setRoomNumber(101);
-        RoomType roomType = createRoomType("Suite");
         room.setRoomType(roomType);
         room.setIsAvailable(true);
         room.setHotel(hotel);
         room = roomRepository.save(room);
 
-        // 3️⃣ Reservation
+        // Reservation
         Reservation reservation = new Reservation();
         reservation.setGuestName("Guest");
         reservation.setGuestEmail("guest@example.com");
@@ -210,21 +217,22 @@ public class ReviewRepositoryTest {
         reservation.setRoom(room);
         reservation = reservationRepository.save(reservation);
 
-        // 4️⃣ Review
+        // Review
         Review review = new Review();
         review.setRating(5);
         review.setComment("Unique Test");
         review.setReview_date(LocalDate.now());
         review.setReservation(reservation);
-        review = reviewRepository.save(review);
 
-        // 5️⃣ Query
+        Review savedReview = reviewRepository.save(review);
+
+        reviewRepository.flush(); // 🔥 IMPORTANT
+
+        // Query
         List<Review> result =
                 reviewRepository.findDistinctByReservationRoomHotelHotelId(hotelId);
 
-
-        Review savedReview = reviewRepository.save(review); // ✅ new variable
-
+        // Assertion
         assertTrue(result.stream()
                 .anyMatch(r -> r.getReview_id().equals(savedReview.getReview_id())));
     }
@@ -236,6 +244,33 @@ public class ReviewRepositoryTest {
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+    @Test
+    void testPaginationReviews() {
+
+        int initialCount = (int) reviewRepository.count(); // 🔥 IMPORTANT
+
+        for (int i = 1; i <= 10; i++) {
+            Review review = new Review();
+            review.setRating(i % 5);
+            review.setComment("Review " + i);
+            review.setReview_date(LocalDate.now());
+
+            reviewRepository.save(review);
+        }
+
+        reviewRepository.flush();
+
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Review> page = reviewRepository.findAll(pageable);
+
+        assertNotNull(page);
+
+        // Only check page size
+        assertEquals(5, page.getContent().size());
+
+        // Check total increased correctly
+        assertEquals(initialCount + 10, page.getTotalElements());
     }
 
     private RoomType createRoomType(String name) {
