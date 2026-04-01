@@ -60,6 +60,7 @@ public class Hotel {
                     foreignKey = @ForeignKey(name = "fk_hotelamenity_amenity")
             )
     )
+    @JsonIgnore
     private List<Amenity> amenities;
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
