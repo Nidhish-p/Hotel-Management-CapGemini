@@ -1,15 +1,18 @@
 package com.example.HotelManagement.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,16 +34,21 @@ public class RoomType {
     private Integer roomTypeId;
 
     @Column(name = "type_name", length = 255, unique = true)
+    @NotBlank
     private String typeName;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "max_occupancy")
+    @Positive
     private int maxOccupancy;
 
     @Column(name = "price_per_night", precision = 10, scale = 2)
+    @Positive
     private BigDecimal pricePerNight;
 
+    @OneToMany(mappedBy = "roomType")
+    private List<Room> rooms;
 
 }
