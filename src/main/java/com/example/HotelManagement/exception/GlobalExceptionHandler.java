@@ -2,6 +2,7 @@ package com.example.HotelManagement.exception;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -50,10 +52,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        return new ResponseEntity<>("Malformed JSON request", HttpStatus.BAD_REQUEST);
-    }
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+//        return new ResponseEntity<>("Malformed JSON request", HttpStatus.BAD_REQUEST);
+//    }
+@ExceptionHandler(HttpMessageNotReadableException.class)
+public ResponseEntity<String> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    Throwable root = ex.getMostSpecificCause();
+    String message = root != null ? root.getMessage() : ex.getMessage();
+    return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+}
+
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
@@ -86,5 +95,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleRoomTypeLinkedException(RoomTypeLinkedException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 }
 

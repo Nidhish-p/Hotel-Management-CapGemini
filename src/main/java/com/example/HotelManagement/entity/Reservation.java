@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -39,14 +40,14 @@ public class Reservation {
     @Column(name = "check_out_date")
     private LocalDate checkOutDate;
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+
     private List<Payment> payments = new ArrayList<>();
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+
     private List<Review> reviews = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name="room_id")
-    @JsonBackReference
+
     private Room room;
 }
