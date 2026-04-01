@@ -18,7 +18,6 @@ import com.example.HotelManagement.entity.Amenity;
 import com.example.HotelManagement.entity.Hotel;
 
 @Repository
-@Transactional(readOnly = true)
 @RepositoryRestResource(excerptProjection = HotelDTO.class)
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
@@ -76,7 +75,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     boolean existsByNameAndHotelIdNot(String name, Integer hotelId);
 
-    @Transactional(readOnly = true)
     default List<Amenity> getAmenityByHotelName(String name) {
         List<Hotel> hotels = findByName(name);
         if (hotels.isEmpty()) {

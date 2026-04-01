@@ -250,21 +250,26 @@ class RoomTypeApiTest {
 
         String roomTypeId = roomTypeLocation.substring(roomTypeLocation.lastIndexOf("/") + 1);
 
-        String roomJson = String.format("""
-                {
-                    "roomNumber": 99901,
-                    "roomTypeId": %s,
-                    "isAvailable": true
-                }
-                """, roomTypeId);
+        String roomJson = """
+        {
+            "roomNumber": 99901,
+            "isAvailable": true
+        }
+        """;
 
-        mockMvc.perform(post("/rooms")
+        String roomLocation = mockMvc.perform(post("/rooms")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(roomJson))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getHeader("Location");
 
-        mockMvc.perform(delete(roomTypeLocation))
+        mockMvc.perform(put(roomLocation + "/roomType")
+                        .contentType(MediaType.parseMediaType("text/uri-list"))
+                        .content(roomTypeLocation))
                 .andExpect(status().isNoContent());
+
     }
 
     // TEST: Deleted room type should no longer be retrievable and return 404 Not Found
