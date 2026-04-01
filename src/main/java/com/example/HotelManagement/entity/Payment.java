@@ -3,6 +3,7 @@ package com.example.HotelManagement.entity;
 import java.sql.Date;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,6 +31,7 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "reservation_id")
+    @JsonBackReference
     private Reservation reservation;
 
 }
