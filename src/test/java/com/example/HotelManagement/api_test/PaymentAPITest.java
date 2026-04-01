@@ -7,8 +7,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +14,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
-import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -94,8 +84,8 @@ public class PaymentAPITest {
         // Create Payment
         payment = new Payment();
         payment.setAmount(299.99);
-        payment.setPayment_status("PAID");
-        payment.setPayment_date(LocalDate.now());
+        payment.setPaymentStatus("PAID");
+        payment.setPaymentDate(LocalDate.now());
         payment.setReservation(reservation);
         entityManager.persist(payment);
 
@@ -107,8 +97,8 @@ public class PaymentAPITest {
         String json = """
                 {
                     "amount": 2377.00,
-                    "payment_date": "2024-01-15",
-                    "payment_status": "CD",
+                    "paymentDate": "2024-01-15",
+                    "paymentStatus": "CD",
                     "reservation":"http://localhost:8081/reservations/1"
                 }
                 """;
@@ -130,16 +120,16 @@ public class PaymentAPITest {
         // Save to real DB
         Payment payment = new Payment();
         payment.setAmount(1800.00);
-        payment.setPayment_status("SUCCESS");
-        payment.setPayment_date(LocalDate.now());
+        payment.setPaymentStatus("SUCCESS");
+        payment.setPaymentDate(LocalDate.now());
         Payment saved = paymentRepository.save(payment);  // ✅ real ID generated here
 
         // Use the real DB-generated ID
-        mockMvc.perform(get("/payments/{id}", saved.getPayment_id())
+        mockMvc.perform(get("/payments/{id}", saved.getPaymentId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(1800.00))
-                .andExpect(jsonPath("$.payment_status").value("SUCCESS"));
+                .andExpect(jsonPath("$.paymentStatus").value("SUCCESS"));
     }
 
     @Test
@@ -147,8 +137,8 @@ public class PaymentAPITest {
         String json = """
                 {
                     "amount":12389,
-                    "payment_date":"2026-03-23",
-                    "payment_status":"Pending"
+                    "paymentDate":"2026-03-23",
+                    "paymentStatus":"Pending"
                 }
                 """;
 
@@ -170,8 +160,8 @@ public class PaymentAPITest {
         String json = """
                 {
                     "amount": -500.00,
-                    "payment_date": "2026-03-28",
-                    "payment_status": "FAILED",
+                    "paymentDate": "2026-03-28",
+                    "paymentStatus": "FAILED",
                     "reservation": "/reservations/%d"
                 }
                 """.formatted(reservation.getReservation_id());
@@ -224,8 +214,8 @@ public class PaymentAPITest {
     void shouldReturnMultiplePaymentsForSameHotel() throws Exception {
         Payment payment2 = new Payment();
         payment2.setAmount(150.00);
-        payment2.setPayment_status("PENDING");
-        payment2.setPayment_date(LocalDate.now());
+        payment2.setPaymentStatus("PENDING");
+        payment2.setPaymentDate(LocalDate.now());
         payment2.setReservation(reservation);
         entityManager.persist(payment2);
         entityManager.flush();
