@@ -3,6 +3,7 @@ package com.example.HotelManagement.entity;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -27,7 +28,7 @@ private int rating;
 String comment;
 @ManyToOne
 @JoinColumn(name="reservation_id")
-@JsonBackReference
+@JsonIgnore
 private Reservation reservation;
 
 }
