@@ -278,7 +278,7 @@ public class HotelRepositoryTest {
 
         Payment payment = new Payment();
         payment.setAmount(1000.0);
-        payment.setPayment_status("PAID");
+        payment.setPaymentStatus("PAID");
         payment.setReservation(reservation);
 
         Review review = new Review();
@@ -296,7 +296,7 @@ public class HotelRepositoryTest {
         entityManager.flush();
         Integer roomId = room.getRoomId();
         Integer reservationId = reservation.getReservation_id();
-        Integer paymentId = payment.getPayment_id();
+        Integer paymentId = payment.getPaymentId();
         Integer reviewId = review.getReview_id();
 
         hotelRepository.deleteById(id);
