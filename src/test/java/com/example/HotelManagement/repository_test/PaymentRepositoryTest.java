@@ -5,7 +5,6 @@ import com.example.HotelManagement.repository.HotelRepository;
 import com.example.HotelManagement.repository.PaymentRepository;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -105,8 +104,8 @@ public class PaymentRepositoryTest {
         // Create Payment
         payment = new Payment();
         payment.setAmount(299.99);
-        payment.setPayment_status("PAID");
-        payment.setPayment_date(LocalDate.now());
+        payment.setPaymentStatus("PAID");
+        payment.setPaymentDate(LocalDate.now());
         payment.setReservation(reservation);
         entityManager.persist(payment);
 
@@ -122,31 +121,31 @@ public class PaymentRepositoryTest {
     public void testSavePayment(){
         Payment saved = paymentRepository.save(payment);
 
-        assertNotNull(saved.getPayment_id());
+        assertNotNull(saved.getPaymentId());
 
     }
 
     @Test
     public void testDeletePayment() {
         paymentRepository.save(payment);
-        paymentRepository.deleteById(payment.getPayment_id());
-        Optional<Payment> result = paymentRepository.findById(payment.getPayment_id());
+        paymentRepository.deleteById(payment.getPaymentId());
+        Optional<Payment> result = paymentRepository.findById(payment.getPaymentId());
         assertFalse(result.isPresent());
     }
 
     @Test
     public void testGetPaymentById() throws Exception{
         Payment saved = paymentRepository.save(payment);
-        mockMvc.perform(get("/payments/" + saved.getPayment_id()))
+        mockMvc.perform(get("/payments/" + saved.getPaymentId()))
                 .andExpect(status().isOk());
     }
 
     @Test
     public void testSavePaymentWithInvalidReservationId(){
         Payment payment = new Payment();
-        payment.setPayment_date(LocalDate.parse("2026-01-24"));
+        payment.setPaymentDate(LocalDate.parse("2026-01-24"));
         payment.setAmount(9089.0);
-        payment.setPayment_status("Paid");
+        payment.setPaymentStatus("Paid");
 
         Reservation fakeReservation = new Reservation();
         fakeReservation.setReservation_id(9999);
@@ -162,8 +161,8 @@ public class PaymentRepositoryTest {
     void testSavePayment_WithNullAmount() {
         Payment payment = new Payment();
         payment.setAmount(null);                               // Amount is null — test nullable behavior
-        payment.setPayment_date(LocalDate.now());
-        payment.setPayment_status("PENDING");
+        payment.setPaymentDate(LocalDate.now());
+        payment.setPaymentStatus("PENDING");
         payment.setReservation(testReservation);
 
         Payment saved = paymentRepository.save(payment);
@@ -174,8 +173,8 @@ public class PaymentRepositoryTest {
     void testSavePayment_WithNullReservation() {
         Payment payment = new Payment();
         payment.setAmount(500.00);
-        payment.setPayment_date(LocalDate.now());
-        payment.setPayment_status("PENDING");
+        payment.setPaymentDate(LocalDate.now());
+        payment.setPaymentStatus("PENDING");
         payment.setReservation(null); // No reservation linked
 
         Payment saved = paymentRepository.save(payment);
@@ -189,38 +188,38 @@ public class PaymentRepositoryTest {
 
         Payment persisted = payment;
 
-        Optional<Payment> found = paymentRepository.findById(persisted.getPayment_id());
+        Optional<Payment> found = paymentRepository.findById(persisted.getPaymentId());
 
         assertThat(found).isPresent();
         assertThat(found.get().getAmount()).isEqualTo(299.99);
-        assertThat(found.get().getPayment_status()).isEqualTo("PAID");
+        assertThat(found.get().getPaymentStatus()).isEqualTo("PAID");
     }
 
     @Test
     void testPatchMultipleFields() throws Exception {
         Payment payment = new Payment();
         payment.setAmount(500.00);
-        payment.setPayment_date(LocalDate.parse("2024-01-15"));
-        payment.setPayment_status("PENDING");
+        payment.setPaymentDate(LocalDate.parse("2024-01-15"));
+        payment.setPaymentStatus("PENDING");
         Payment saved = paymentRepository.save(payment);
 
         Map<String, Object> patchData = new HashMap<>();
         patchData.put("amount", 1000.00);
-        patchData.put("payment_status", "FAILED");
-        patchData.put("payment_date", "2024-06-01");
+        patchData.put("paymentStatus", "FAILED");
+        patchData.put("paymentDate", "2024-06-01");
 
         // Step 1: PATCH - just assert it succeeded
-        mockMvc.perform(patch("/payments/" + saved.getPayment_id())
+        mockMvc.perform(patch("/payments/" + saved.getPaymentId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patchData)))
                 .andExpect(status().isNoContent()); // ✅ 204 is correct
 
         // Step 2: GET - verify updated values
-        mockMvc.perform(get("/payments/" + saved.getPayment_id())
+        mockMvc.perform(get("/payments/" + saved.getPaymentId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(1000.00))
-                .andExpect(jsonPath("$.payment_status").value("FAILED"));
+                .andExpect(jsonPath("$.paymentStatus").value("FAILED"));
     }
 
     @Test
@@ -232,7 +231,7 @@ public class PaymentRepositoryTest {
         assertNotNull(payments);
         assertFalse(payments.isEmpty());
         assertEquals(1, payments.size());
-        assertEquals("PAID", payments.get(0).getPayment_status());
+        assertEquals("PAID", payments.get(0).getPaymentStatus());
         assertEquals(299.99, payments.get(0).getAmount());
     }
 
@@ -250,8 +249,8 @@ public class PaymentRepositoryTest {
         // Add second payment for same reservation
         Payment payment2 = new Payment();
         payment2.setAmount(150.00);
-        payment2.setPayment_status("PENDING");
-        payment2.setPayment_date(LocalDate.now());
+        payment2.setPaymentStatus("PENDING");
+        payment2.setPaymentDate(LocalDate.now());
         payment2.setReservation(reservation);
         entityManager.persist(payment2);
         entityManager.flush();
@@ -288,8 +287,8 @@ public class PaymentRepositoryTest {
 
         Payment payment2 = new Payment();
         payment2.setAmount(500.00);
-        payment2.setPayment_status("PAID");
-        payment2.setPayment_date(LocalDate.now());
+        payment2.setPaymentStatus("PAID");
+        payment2.setPaymentDate(LocalDate.now());
         payment2.setReservation(reservation2);
         entityManager.persist(payment2);
         entityManager.flush();
@@ -310,10 +309,10 @@ public class PaymentRepositoryTest {
         Payment result = payments.get(0);
 
         assertAll(
-                () -> assertNotNull(result.getPayment_id()),
+                () -> assertNotNull(result.getPaymentId()),
                 () -> assertEquals(299.99, result.getAmount()),
-                () -> assertEquals("PAID", result.getPayment_status()),
-                () -> assertNotNull(result.getPayment_date()),
+                () -> assertEquals("PAID", result.getPaymentStatus()),
+                () -> assertNotNull(result.getPaymentDate()),
                 () -> assertEquals(reservation.getReservation_id(),
                         result.getReservation().getReservation_id())
         );
