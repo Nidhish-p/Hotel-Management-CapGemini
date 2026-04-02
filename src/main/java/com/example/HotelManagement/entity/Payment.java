@@ -1,6 +1,5 @@
 package com.example.HotelManagement.entity;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -23,12 +22,12 @@ public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer payment_id;
+    private Integer paymentId;
 
     @Positive(message = "amount must be positive")
     private Double amount;
-    private LocalDate payment_date;
-    private String payment_status;
+    private LocalDate paymentDate;
+    private String paymentStatus;
 
     @ManyToOne
     @JoinColumn(name = "reservation_id")

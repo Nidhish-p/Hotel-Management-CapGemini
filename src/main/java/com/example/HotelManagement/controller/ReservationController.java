@@ -62,7 +62,7 @@ public class ReservationController {
             Payment p = r.getPayments().get(0);
 
             dto.paymentAmount = p.getAmount();
-            dto.paymentStatus = p.getPayment_status();
+            dto.paymentStatus = p.getPaymentStatus();
         }
 
         return dto;
