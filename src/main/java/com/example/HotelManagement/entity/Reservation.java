@@ -4,6 +4,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,11 +41,14 @@ public class Reservation {
     @Column(name = "check_out_date")
     private LocalDate checkOutDate;
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("reservation")
     private List<Payment> payments = new ArrayList<>();
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+
     private List<Review> reviews = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name="room_id")
+
     private Room room;
 }

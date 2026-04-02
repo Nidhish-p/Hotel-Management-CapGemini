@@ -7,7 +7,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,7 +18,6 @@ import com.example.HotelManagement.entity.Amenity;
 import com.example.HotelManagement.entity.Hotel;
 
 @Repository
-@Transactional(readOnly = true)
 @RepositoryRestResource(excerptProjection = HotelDTO.class)
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
@@ -74,7 +75,6 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
     boolean existsByNameAndHotelIdNot(String name, Integer hotelId);
 
-    @Transactional(readOnly = true)
     default List<Amenity> getAmenityByHotelName(String name) {
         List<Hotel> hotels = findByName(name);
         if (hotels.isEmpty()) {
@@ -89,5 +89,8 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
         }
         return amenities;
     }
+
+    @RestResource(path = "findByAmenityName")
+    Page<Hotel> findByAmenities_Name(@Param("amenity") String amenity, Pageable pageable);
 
 }
