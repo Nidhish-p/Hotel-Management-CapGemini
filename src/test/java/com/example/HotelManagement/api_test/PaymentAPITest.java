@@ -236,9 +236,10 @@ public class PaymentAPITest {
     }
 
     @Test
-    void shouldReturn200WhenHotelIdIsMissing() throws Exception {
+    void shouldReturn200WhenHotelIdIsPresent() throws Exception {
         mockMvc.perform(get("/payments/search/by-hotel")
+                        .param("hotelId", String.valueOf(hotel.getHotelId()))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk()); // ✅ FIX
+                .andExpect(status().isOk());
     }
 }
