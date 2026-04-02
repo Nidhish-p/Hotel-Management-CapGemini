@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.HotelManagement.dto.ReservationDetailsDTO;
+import com.example.HotelManagement.dto.ReservationResponseDTO;
 import com.example.HotelManagement.entity.Payment;
 import com.example.HotelManagement.entity.Reservation;
 import com.example.HotelManagement.entity.Room;
@@ -69,7 +70,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public Reservation addReservation(@RequestBody Reservation request) {
+    public ReservationResponseDTO addReservation(@RequestBody Reservation request) {
         Room room = roomRepository.findById(request.getRoom().getRoomId())
                 .orElseThrow(() -> new RuntimeException("Room not found"));
         if (!room.getIsAvailable()) {
@@ -95,7 +96,17 @@ public class ReservationController {
 
         request.setRoom(room);
 
-        return reservationRepository.save(request);
+        Reservation res = reservationRepository.save(request);
+        ReservationResponseDTO dto = new ReservationResponseDTO();
+
+            dto.setId(res.getReservation_id());
+            dto.setGuestName(res.getGuestName());
+            dto.setGuestEmail(res.getGuestEmail());
+            dto.setGuestPhone(res.getGuest_phone());
+            dto.setCheckInDate(res.getCheckInDate());
+            dto.setCheckOutDate(res.getCheckOutDate());
+
+            return dto;
     }
 
 
