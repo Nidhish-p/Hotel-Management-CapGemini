@@ -10,16 +10,16 @@ import java.time.LocalDate;
 @Projection(name = "paymentDetails", types = Payment.class)
 public interface  PaymentDetailsDTO {
 
-    @Value("#{target.payment_id}")
+    @Value("#{target.paymentId}")
     Integer getPaymentId();
 
     @Value("#{target.amount}")
     Double getAmount();
 
-    @Value("#{target.payment_status}")
+    @Value("#{target.paymentStatus}")
     String getPaymentStatus();
 
-    @Value("#{target.payment_date}")
+    @Value("#{target.paymentDate}")
     LocalDate getPaymentDate();
 
     // Keep these as they are

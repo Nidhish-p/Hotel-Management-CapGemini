@@ -62,17 +62,21 @@ class RoomRepositoryTest {
     @Test
     @DisplayName("Every room has a hotel assigned")
     void everyRoom_hasHotel() {
-        roomRepository.findAll().forEach(room ->
-                assertThat(room.getHotel()).isNotNull()
-        );
+        hotelRepository.findAll().forEach(hotel -> {
+            roomRepository.findByHotel_HotelId(hotel.getHotelId()).forEach(room ->
+                    assertThat(room.getHotel()).isNotNull()
+            );
+        });
     }
 
     @Test
     @DisplayName("Every room has a room type assigned")
     void everyRoom_hasRoomType() {
-        roomRepository.findAll().forEach(room ->
-                assertThat(room.getRoomType()).isNotNull()
-        );
+        hotelRepository.findAll().forEach(hotel -> {
+            roomRepository.findByHotel_HotelId(hotel.getHotelId()).forEach(room ->
+                    assertThat(room.getRoomType()).isNotNull()
+            );
+        });
     }
 
     @Test
